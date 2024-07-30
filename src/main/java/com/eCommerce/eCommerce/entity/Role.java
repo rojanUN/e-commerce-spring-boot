@@ -10,16 +10,16 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Table(name = "roles")
 @Getter
 @Setter
 @Accessors(chain = true)
 @Entity
+@Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    private Integer id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     @Enumerated(EnumType.STRING)

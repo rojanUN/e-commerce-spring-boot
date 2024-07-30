@@ -14,15 +14,15 @@ import java.util.Collection;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Table(name = "users")
 @Entity
 @Setter
 @Getter
 @Accessors(chain = true)
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String fullName;
@@ -77,3 +77,4 @@ public class User implements UserDetails {
         return UserDetails.super.isEnabled();
     }
 }
+
