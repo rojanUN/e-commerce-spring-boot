@@ -4,6 +4,7 @@ import com.eCommerce.eCommerce.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +13,7 @@ import java.util.Date;
 @Table(name = "roles")
 @Getter
 @Setter
+@Accessors(chain = true)
 @Entity
 public class Role {
     @Id
