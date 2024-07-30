@@ -1,38 +1,45 @@
 package com.eCommerce.eCommerce.service;
 
-import com.eCommerce.eCommerce.dto.RegisterUserDto;
-import com.eCommerce.eCommerce.entity.User;
-import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.dto.LoginUserDto;
+import com.eCommerce.eCommerce.dto.RegisterUserDto;
+import com.eCommerce.eCommerce.entity.Role;
+import com.eCommerce.eCommerce.entity.User;
+import com.eCommerce.eCommerce.enums.RoleEnum;
+import com.eCommerce.eCommerce.repository.RoleRepository;
+import com.eCommerce.eCommerce.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
+@AllArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
+    private final RoleRepository roleRepository;
+
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(
-            UserRepository userRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User signup(RegisterUserDto input) {
-        User user = new User()
-                .setEmail(input.getEmail())
+        Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.USER);
+
+        if (optionalRole.isEmpty()) {
+            return null;
+        }
+
+        var user = new User()
                 .setFullName(input.getFullName())
-                .setPassword(passwordEncoder.encode(input.getPassword()));
+                .setEmail(input.getEmail())
+                .setPassword(passwordEncoder.encode(input.getPassword()))
+                .setRole(optionalRole.get());
 
         return userRepository.save(user);
     }

@@ -6,10 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Data
 @Getter
 @Setter
+@Accessors(chain = true)
 public class RegisterUserDto {
     @NotEmpty(message = "The full name is required.")
     @Size(min = 2, max = 100, message = "The length of full name must be between 2 and 100 characters.")
