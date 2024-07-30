@@ -1,0 +1,71 @@
+Entities and Relationships
+User
+
+Attributes: UserID, FullName, Email, Password, RoleID, CreatedAt
+Relationships:
+A User has one Role
+A User can have multiple Orders
+A User can write multiple Reviews
+A User can have multiple Addresses
+A User can have multiple PaymentMethods
+Role
+
+Attributes: RoleID, RoleName, Description
+Relationships:
+A Role can be assigned to multiple Users
+Product
+
+Attributes: ProductID, Name, Description, Price, Stock, CategoryID, CreatedAt, UpdatedAt
+Relationships:
+A Product belongs to one Category
+A Product can have multiple OrderItems
+A Product can have multiple Reviews
+Category
+
+Attributes: CategoryID, Name, Description
+Relationships:
+A Category can have multiple Products
+Order
+
+Attributes: OrderID, UserID, OrderDate, Status, TotalAmount, ShippingAddressID, PaymentMethodID
+Relationships:
+An Order is placed by one User
+An Order can have multiple OrderItems
+An Order has one ShippingAddress
+An Order uses one PaymentMethod
+OrderItem
+
+Attributes: OrderItemID, OrderID, ProductID, Quantity, UnitPrice
+Relationships:
+An OrderItem belongs to one Order
+An OrderItem refers to one Product
+Review
+
+Attributes: ReviewID, ProductID, UserID, Rating, Comment, CreatedAt
+Relationships:
+A Review is written by one User
+A Review refers to one Product
+Wishlist
+
+Attributes: WishlistID, UserID, CreatedAt
+Relationships:
+A Wishlist belongs to one User
+A Wishlist can have multiple WishlistItems
+WishlistItem
+
+Attributes: WishlistItemID, WishlistID, ProductID
+Relationships:
+A WishlistItem belongs to one Wishlist
+A WishlistItem refers to one Product
+Address
+
+Attributes: AddressID, UserID, Street, City, State, Country, PostalCode, IsDefault, CreatedAt
+Relationships:
+An Address belongs to one User
+An Order can use one Address as the ShippingAddress
+PaymentMethod
+
+Attributes: PaymentMethodID, UserID, Type (e.g., Credit Card, PayPal), Provider, AccountNumber, ExpiryDate, IsDefault, CreatedAt
+Relationships:
+A PaymentMethod belongs to one User
+An Order uses one PaymentMethod
