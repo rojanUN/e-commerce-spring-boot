@@ -21,17 +21,22 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/create")
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest categoryRequest){
+    public ApiResponse createCategory(@RequestBody CategoryRequest categoryRequest){
         return categoryService.createCategory(categoryRequest);
     }
 
     @GetMapping("/find-all")
-    public ResponseEntity<List<CategoryResponse>> findCategories(){
+    public ApiResponse findCategories(){
         return categoryService.findCategories();
     }
 
     @DeleteMapping("/{id}/remove")
     public ApiResponse deleteCategory(@PathVariable Long id){
         return categoryService.deleteCategoryById(id);
+    }
+
+    @PutMapping("/{id}/update")
+    public ApiResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest){
+        return categoryService.updateCategory(id, categoryRequest);
     }
 }

@@ -1,10 +1,13 @@
 package com.eCommerce.eCommerce.builder;
 
+import com.eCommerce.eCommerce.dto.response.CategoryResponse;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.exceptions.ExceptionUtil;
 import com.eCommerce.eCommerce.model.ApiError;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 
 public class ServiceResponseBuilder {
 
@@ -55,5 +58,11 @@ public class ServiceResponseBuilder {
         return response;
     }
 
+    public static <T> ApiResponse buildResponse(List<?> data) {
+        ApiResponse response = new ApiResponse();
+        response.setData(data);
+        response.setMessage("Success");
+        return response;
+    }
 }
 

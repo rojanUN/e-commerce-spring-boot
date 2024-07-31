@@ -10,7 +10,6 @@ import com.eCommerce.eCommerce.repository.CategoryRepository;
 import com.eCommerce.eCommerce.service.CategoryService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,28 +24,23 @@ public class CategoryServiceImpl implements CategoryService {
 
 
     @Override
-    public ResponseEntity<CategoryResponse> createCategory(CategoryRequest categoryRequest) {
+    public ApiResponse createCategory(CategoryRequest categoryRequest) {
         Category category = new Category();
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
         CategoryResponse categoryResponse = new CategoryResponse();
         modelMapper.map(categoryRequest, categoryResponse);
-        return ResponseEntity.ok(categoryResponse);
+        return ServiceResponseBuilder.buildSuccessResponse(categoryResponse);
     }
 
     @Override
-    public ResponseEntity<List<CategoryResponse>> findCategories() {
+    public ApiResponse findCategories() {
         List<Category> categories = categoryRepository.findAll();
         List<CategoryResponse> categoryResponses = categories.stream()
-                .map(category -> {
-                    CategoryResponse response = new CategoryResponse();
-                    response.setId(category.getId());
-                    response.setName(category.getName());
-                    response.setDescription(category.getDescription());
-                    return response;
-                })
+                .map(category -> modelMapper.map(category, CategoryResponse.class))
                 .toList();
-        return ResponseEntity.ok(categoryResponses);
+
+        return ServiceResponseBuilder.buildSuccessResponse(categoryResponses);
     }
 
     @Override
@@ -62,4 +56,15 @@ public class CategoryServiceImpl implements CategoryService {
             throw new EcommerceException("CAT002");
         }
     }
+
+    @Override
+    public ApiResponse updateCategory(Long id, CategoryRequest categoryRequest) {
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new EcommerceException("CAT001"));
+        modelMapper.map(categoryRequest, category);
+        categoryRepository.save(category);
+        CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);
+        return ServiceResponseBuilder.buildSuccessResponse(categoryResponse);
+    }
+
+
 }
