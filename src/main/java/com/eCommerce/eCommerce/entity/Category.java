@@ -17,6 +17,5 @@ public class Category {
     private String name;
 
     @Column(nullable = false)
-    @Lob
     private String description;
 }

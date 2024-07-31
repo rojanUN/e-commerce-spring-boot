@@ -27,7 +27,6 @@ public class Review {
 
     private Integer rating;
 
-    @Lob
     private String comment;
 
     @CreationTimestamp

@@ -22,7 +22,6 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
-    @Lob
     private String description;
 
     @Column(nullable = false)
