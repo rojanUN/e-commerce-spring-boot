@@ -1,4 +1,4 @@
-package com.eCommerce.eCommerce.service;
+package com.eCommerce.eCommerce.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

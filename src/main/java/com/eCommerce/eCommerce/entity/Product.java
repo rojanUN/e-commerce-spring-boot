@@ -38,8 +38,8 @@ public class Product {
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "category_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
 }

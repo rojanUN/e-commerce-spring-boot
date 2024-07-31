@@ -1,4 +1,4 @@
-package com.eCommerce.eCommerce.service;
+package com.eCommerce.eCommerce.service.impl;
 
 import com.eCommerce.eCommerce.dto.LoginUserDto;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
