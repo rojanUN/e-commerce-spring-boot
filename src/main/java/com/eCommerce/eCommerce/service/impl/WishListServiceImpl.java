@@ -1,6 +1,6 @@
 package com.eCommerce.eCommerce.service.impl;
 
-import com.eCommerce.eCommerce.builder.ServiceResponseBuilder;
+import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.response.WishListResponse;
 import com.eCommerce.eCommerce.entity.Product;
 import com.eCommerce.eCommerce.entity.User;
@@ -38,7 +38,7 @@ public class WishListServiceImpl implements WishListService {
             wishListRepository.save(wishList);
         }
         WishListResponse wishListResponse = mapToWishListResponse(wishList);
-        return ServiceResponseBuilder.buildSuccessResponse(wishListResponse);
+        return ResponseBuilder.buildSuccessResponse(wishListResponse);
     }
 
 
@@ -58,7 +58,7 @@ public class WishListServiceImpl implements WishListService {
         WishListResponse wishListResponse = new WishListResponse();
         modelMapper.map(wishList, wishListResponse);
 
-        return ServiceResponseBuilder.buildSuccessResponse(wishListResponse);
+        return ResponseBuilder.buildSuccessResponse(wishListResponse);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class WishListServiceImpl implements WishListService {
         WishList wishList = getWishListByUserIdHelper(userId);
         wishList.getWishListItem().removeIf(item -> item.getProduct().getId().equals(productId));
         wishListRepository.save(wishList);
-        return ServiceResponseBuilder.buildSuccessResponse("message.wish.list.deleted.success");
+        return ResponseBuilder.buildSuccessResponse("message.wish.list.deleted.success");
     }
 
 

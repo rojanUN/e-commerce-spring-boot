@@ -1,6 +1,6 @@
 package com.eCommerce.eCommerce.service.impl;
 
-import com.eCommerce.eCommerce.builder.ServiceResponseBuilder;
+import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.CategoryRequest;
 import com.eCommerce.eCommerce.dto.response.CategoryResponse;
 import com.eCommerce.eCommerce.entity.Category;
@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
         CategoryResponse categoryResponse = new CategoryResponse();
         modelMapper.map(categoryRequest, categoryResponse);
-        return ServiceResponseBuilder.buildSuccessResponse(categoryResponse);
+        return ResponseBuilder.buildSuccessResponse(categoryResponse);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(category -> modelMapper.map(category, CategoryResponse.class))
                 .toList();
 
-        return ServiceResponseBuilder.buildSuccessResponse(categoryResponses);
+        return ResponseBuilder.buildSuccessResponse(categoryResponses);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         try {
             categoryRepository.deleteById(id);
-            return ServiceResponseBuilder.buildSuccessResponse("message.category.deleted.success");
+            return ResponseBuilder.buildSuccessResponse("message.category.deleted.success");
         } catch (Exception e) {
             throw new EcommerceException("CAT002");
         }
@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
         CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);
-        return ServiceResponseBuilder.buildSuccessResponse(categoryResponse);
+        return ResponseBuilder.buildSuccessResponse(categoryResponse);
     }
 
 

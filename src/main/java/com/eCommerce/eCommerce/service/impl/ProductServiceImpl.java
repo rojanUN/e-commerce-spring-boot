@@ -1,6 +1,6 @@
 package com.eCommerce.eCommerce.service.impl;
 
-import com.eCommerce.eCommerce.builder.ServiceResponseBuilder;
+import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.ProductRequest;
 import com.eCommerce.eCommerce.dto.response.ProductResponse;
 import com.eCommerce.eCommerce.entity.Category;
@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         ProductResponse productResponse = modelMapper.map(product, ProductResponse.class);
-        return ServiceResponseBuilder.buildSuccessResponse(productResponse);
+        return ResponseBuilder.buildSuccessResponse(productResponse);
     }
 
     @Override
@@ -59,14 +59,14 @@ public class ProductServiceImpl implements ProductService {
                     return response;
                 })
                 .toList();
-        return ServiceResponseBuilder.buildSuccessResponse(productResponses);
+        return ResponseBuilder.buildSuccessResponse(productResponses);
     }
 
     @Override
     public ApiResponse findProductById(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new EcommerceException("PRO001"));
         ProductResponse productResponse = modelMapper.map(product, ProductResponse.class);
-        return ServiceResponseBuilder.buildSuccessResponse(productResponse);
+        return ResponseBuilder.buildSuccessResponse(productResponse);
 
     }
 
@@ -78,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             productRepository.deleteById(id);
-            return ServiceResponseBuilder.buildSuccessResponse("message.product.deleted.success");
+            return ResponseBuilder.buildSuccessResponse("message.product.deleted.success");
         } catch (Exception e) {
             throw new EcommerceException("PRO002");
         }

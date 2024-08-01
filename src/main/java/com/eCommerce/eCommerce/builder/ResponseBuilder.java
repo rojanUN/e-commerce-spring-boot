@@ -1,6 +1,5 @@
 package com.eCommerce.eCommerce.builder;
 
-import com.eCommerce.eCommerce.dto.response.CategoryResponse;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.exceptions.ExceptionUtil;
 import com.eCommerce.eCommerce.model.ApiError;
@@ -9,7 +8,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public class ServiceResponseBuilder {
+public class ResponseBuilder {
 
     public static ApiResponse buildSuccessResponse(Object o) {
         ApiResponse response = new ApiResponse();
