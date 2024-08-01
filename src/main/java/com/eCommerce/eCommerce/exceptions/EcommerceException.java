@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class EcommerceException extends RuntimeException{
+public class EcommerceException extends RuntimeException {
 
     private String code;
 

@@ -17,6 +17,7 @@ import java.util.Properties;
 @Configuration
 @Slf4j
 public class MessageBundle {
+
     public static final Map<String, String> lookup = new HashMap<>();
     private static final String ERROR_FILE = "errors";
     private static final String PROPERTIES = "properties";
@@ -27,6 +28,7 @@ public class MessageBundle {
     public Codes getCodeLookups() {
         return code -> new ApiError(code, lookup.getOrDefault(code, AppConstant.CODE_NOT_REGISTERED_MESSAGE));
     }
+
     @PostConstruct
     public void initialize() {
         try {
@@ -37,7 +39,6 @@ public class MessageBundle {
                 lookup.put(key, value);
             }
         } catch (IOException e) {
-            // Handle exception appropriately
             log.error("Error: " + e.getMessage());
         }
     }

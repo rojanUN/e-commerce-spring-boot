@@ -13,7 +13,6 @@ import java.util.*;
 public class RoleSeeder implements ApplicationListener<ContextRefreshedEvent> {
     private final RoleRepository roleRepository;
 
-
     public RoleSeeder(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
