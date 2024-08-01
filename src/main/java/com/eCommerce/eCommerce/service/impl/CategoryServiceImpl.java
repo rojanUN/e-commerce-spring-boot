@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
         CategoryResponse categoryResponse = new CategoryResponse();
         modelMapper.map(categoryRequest, categoryResponse);
-        return ResponseBuilder.buildSuccessResponse(categoryResponse);
+        return ResponseBuilder.buildSuccessResponse(categoryResponse, "message.category.created.success");
     }
 
     @Override
@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
         CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);
-        return ResponseBuilder.buildSuccessResponse(categoryResponse);
+        return ResponseBuilder.buildSuccessResponse(categoryResponse, "message.category.updated.success");
     }
 
 
