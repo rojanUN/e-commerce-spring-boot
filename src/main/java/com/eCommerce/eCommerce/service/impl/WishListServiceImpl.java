@@ -32,7 +32,7 @@ public class WishListServiceImpl implements WishListService {
     public ApiResponse getWishListByUserId(Long userId) {
         WishList wishList = wishListRepository.findByUserId(userId);
         if (wishList == null) {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
             wishList = new WishList();
             wishList.setUser(user);
             wishListRepository.save(wishList);
