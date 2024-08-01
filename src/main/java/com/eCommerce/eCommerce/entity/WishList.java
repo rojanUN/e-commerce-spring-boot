@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -26,7 +28,8 @@ public class WishList {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+
     @OneToMany(mappedBy = "wishList", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WishListItem> wishListItem;
+    private List<WishListItem> wishListItem = new ArrayList<>();
 
 }
