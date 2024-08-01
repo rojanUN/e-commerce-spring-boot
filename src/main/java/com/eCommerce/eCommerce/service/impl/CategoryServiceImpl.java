@@ -7,6 +7,7 @@ import com.eCommerce.eCommerce.entity.Category;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.CategoryRepository;
+import com.eCommerce.eCommerce.repository.ProductRepository;
 import com.eCommerce.eCommerce.service.CategoryService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,6 +20,8 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    private final ProductRepository productRepository;
 
     private final ModelMapper modelMapper;
 
@@ -50,6 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         try {
+            productRepository.deleteByCategoryId(id);
             categoryRepository.deleteById(id);
             return ResponseBuilder.buildSuccessResponse("message.category.deleted.success");
         } catch (Exception e) {

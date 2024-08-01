@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #218838;
+        }
+        .message {
+            margin-top: 15px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Sign Up</h2>
+    <div id="signup">
+        <div class="form-group">
+            <label for="signupFullName">Full Name</label>
+            <input type="text" id="signupFullName" placeholder="Enter full name" required>
+        </div>
+        <div class="form-group">
+            <label for="signupEmail">Email</label>
+            <input type="email" id="signupEmail" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" placeholder="Enter password" required>
+        </div>
+        <button onclick="register()">Sign Up</button>
+        <div id="signupMessage" class="message"></div>
+    </div>
+
+    <h2>Login</h2>
+    <div id="login">
+        <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" required>
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="loginMessage" class="message"></div>
+    </div>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:8080/auth';
+
+    async function register() {
+        const fullName = document.getElementById('signupFullName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const messageElement = document.getElementById('signupMessage');
+
+        try {
+            const response = await fetch(`${apiUrl}/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fullName, email, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                messageElement.textContent = `User ${data.email} registered successfully!`;
+                messageElement.style.color = 'green';
+            } else {
+                const errorData = await response.json();
+                messageElement.textContent = `Error: ${errorData.message}`;
+            }
+        } catch (error) {
+            messageElement.textContent = 'An error occurred. Please try again.';
+        }
+    }
+
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const messageElement = document.getElementById('loginMessage');
+
+        try {
+            const response = await fetch(`${apiUrl}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                messageElement.textContent = `Login successful! Token: ${data.token}`;
+                messageElement.style.color = 'green';
+            } else {
+                const errorData = await response.json();
+                messageElement.textContent = `Error: ${errorData.message}`;
+            }
+        } catch (error) {
+            messageElement.textContent = 'An error occurred. Please try again.';
+        }
+    }
+</script>
+</body>
+</html>

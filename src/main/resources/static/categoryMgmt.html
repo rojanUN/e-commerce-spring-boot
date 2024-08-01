@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>Category Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            width: 600px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #218838;
+        }
+        .message {
+            margin-top: 15px;
+            color: red;
+        }
+        .category-list {
+            margin-top: 20px;
+        }
+        .category-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .category-list th, .category-list td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .category-list th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Manage Categories</h2>
+
+    <div id="createCategory">
+        <h3>Create Category</h3>
+        <div class="form-group">
+            <label for="categoryName">Category Name</label>
+            <input type="text" id="categoryName" placeholder="Enter category name" required>
+        </div>
+        <div class="form-group">
+            <label for="categoryDescription">Description</label>
+            <textarea id="categoryDescription" rows="4" placeholder="Enter description" required></textarea>
+        </div>
+        <button onclick="createCategory()">Create Category</button>
+        <div id="createCategoryMessage" class="message"></div>
+    </div>
+
+    <div class="category-list">
+        <h3>Existing Categories</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="categoryTableBody">
+            <!-- Categories will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:8080/category';
+
+    // Check if user is authenticated
+    function checkAuth() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You are not authenticated. Please log in.');
+            window.location.href = 'login.html'; // Redirect to login page
+        }
+    }
+
+    // Create category
+    async function createCategory() {
+        const name = document.getElementById('categoryName').value;
+        const description = document.getElementById('categoryDescription').value;
+        const messageElement = document.getElementById('createCategoryMessage');
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`${apiUrl}/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ name, description })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                messageElement.textContent = `Category ${data.name} created successfully!`;
+                messageElement.style.color = 'green';
+                fetchCategories(); // Refresh the category list
+            } else {
+                const errorData = await response.json();
+                messageElement.textContent = `Error: ${errorData.message}`;
+            }
+        } catch (error) {
+            messageElement.textContent = 'An error occurred. Please try again.';
+        }
+    }
+
+    async function fetchCategories() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No token found');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiUrl}/find-all`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Fetched data:', result); // Log the result to check its structure
+
+                const tableBody = document.getElementById('categoryTableBody');
+                tableBody.innerHTML = ''; // Clear the table body before inserting new data
+
+                // Access the data property from the response
+                if (result.success && Array.isArray(result.data)) {
+                    result.data.forEach(category => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${category.id}</td>
+                        <td>${category.name}</td>
+                        <td>${category.description}</td>
+                        <td><button onclick="deleteCategory(${category.id})">Delete</button></td>
+                    `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    console.error('Unexpected response format:', result);
+                }
+            } else {
+                console.error('Failed to fetch categories:', response.statusText);
+            }
+        } catch (error) {
+            console.error('An error occurred while fetching categories:', error);
+        }
+    }
+
+
+
+    // Delete category
+    async function deleteCategory(id) {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await fetch(`${apiUrl}/${id}/remove`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert('Category deleted successfully!');
+                fetchCategories(); // Refresh the category list
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message}`);
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+        }
+    }
+
+    // Update category (not implemented, but you can add this functionality similarly)
+    function updateCategory(id) {
+        // Implement update functionality here
+    }
+
+    // Initialize
+    checkAuth();
+    fetchCategories();
+</script>
+</body>
+</html>
