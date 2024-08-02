@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-    @RequestMapping("/wish-lists")
+@RequestMapping("/wish-lists")
 public class WishListController {
 
     private final WishListService wishListService;
@@ -23,7 +23,6 @@ public class WishListController {
     public ApiResponse addProductToWishList(@PathVariable Long productId, @AuthenticationPrincipal User user) {
         return wishListService.addProductToWishList(user.getId(), productId);
     }
-
 
     @DeleteMapping("/remove/{productId}")
     public ApiResponse removeProductFromWishList(@PathVariable Long productId, @AuthenticationPrincipal User user) {
