@@ -10,6 +10,7 @@ import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.AddressRepository;
 import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.service.AddressService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,10 @@ public class AddressServiceImpl implements AddressService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public ApiResponse addAddress(Long userId, AddressRequest addressRequest) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+        User user = userRepository.findById(userId).
+                orElseThrow(() -> new EcommerceException("USR001"));
 
         if (addressRequest.getIsDefault()) {
             addressRepository.findByUserIdAndIsDefaultTrue(userId).ifPresent(defaultAddress -> {
@@ -47,7 +50,8 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public ApiResponse removeAddress(Long userId, Long addressId) {
-        Address address = addressRepository.findById(addressId).orElseThrow(() -> new EcommerceException("ADR001"));
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new EcommerceException("ADR001"));
         if (!address.getUser().getId().equals(userId)) {
             throw new EcommerceException("ADR002");
         }
@@ -56,8 +60,10 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    @Transactional
     public ApiResponse updateAddress(Long userId, Long addressId, AddressRequest addressRequest) {
-        Address address = addressRepository.findById(addressId).orElseThrow(() -> new EcommerceException("ADR001"));
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new EcommerceException("ADR001"));
         if (!address.getUser().getId().equals(userId)) {
             throw new EcommerceException("ADR002");
         }
@@ -80,13 +86,12 @@ public class AddressServiceImpl implements AddressService {
     public ApiResponse findAllAddressByUserId(Long userId) {
         List<Address> addresses = addressRepository.findByUserId(userId);
         if (addresses.isEmpty()) {
-            return ResponseBuilder.buildSuccessResponse("message.address.address.empty");
+            return ResponseBuilder.buildSuccessResponse("message.address.empty");
         }
         List<AddressResponse> addressResponses = addresses.stream()
                 .map(address -> modelMapper.map(address, AddressResponse.class))
                 .toList();
         return ResponseBuilder.buildSuccessResponse(addressResponses);
     }
-
 
 }

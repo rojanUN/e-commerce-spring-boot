@@ -11,14 +11,14 @@ import com.eCommerce.eCommerce.repository.CategoryRepository;
 import com.eCommerce.eCommerce.repository.ProductRepository;
 import com.eCommerce.eCommerce.service.ProductService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
