@@ -9,7 +9,7 @@ public interface AddressService {
 
     ApiResponse removeAddress(Long userId, Long addressId);
 
-    ApiResponse updateAddress(Long userId, AddressRequest addressRequest);
+    ApiResponse updateAddress(Long userId, Long addressId, AddressRequest addressRequest);
 
     ApiResponse findAllAddressByUserId(Long userId);
 }
