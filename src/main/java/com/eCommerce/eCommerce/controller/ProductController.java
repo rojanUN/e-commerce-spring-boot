@@ -3,6 +3,7 @@ package com.eCommerce.eCommerce.controller;
 import com.eCommerce.eCommerce.dto.ProductRequest;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
-    public ApiResponse createProduct(@RequestBody ProductRequest productRequest) {
+    public ApiResponse createProduct(@Valid @RequestBody ProductRequest productRequest) {
         return productService.createProduct(productRequest);
     }
 
@@ -26,19 +27,19 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/find")
-    public ApiResponse findProductById(@PathVariable Long id){
+    public ApiResponse findProductById(@PathVariable Long id) {
         return productService.findProductById(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/remove")
-    public ApiResponse removeProductById(@PathVariable Long id){
+    public ApiResponse removeProductById(@PathVariable Long id) {
         return productService.removeProduct(id);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/update")
-    public ApiResponse updateProduct(@PathVariable Long id, @RequestBody ProductRequest productRequest){
+    public ApiResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest) {
         return productService.updateProduct(id, productRequest);
     }
 
