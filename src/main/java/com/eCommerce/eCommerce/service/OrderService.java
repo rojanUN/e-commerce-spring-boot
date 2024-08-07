@@ -10,4 +10,8 @@ public interface OrderService {
     ApiResponse findOrders(Long userId);
 
     ApiResponse cancelOrder(Long userId, Long orderId);
+
+    ApiResponse completeOrder(Long orderId);
+
+
 }

@@ -29,7 +29,7 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
 
     @Override
-    public ApiResponse createProduct(ProductRequest productRequest, Long adminId) {
+    public ApiResponse createProduct(ProductRequest productRequest) {
         Category category = categoryRepository.findById(productRequest.getCategoryId())
                 .orElseThrow(() -> new EcommerceException("CAT001"));
 

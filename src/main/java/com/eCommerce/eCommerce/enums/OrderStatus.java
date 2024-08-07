@@ -3,6 +3,6 @@ package com.eCommerce.eCommerce.enums;
 public enum OrderStatus {
     PENDING,
     SHIPPED,
-    DELIVERED,
+    COMPLETED,
     CANCELLED
 }
