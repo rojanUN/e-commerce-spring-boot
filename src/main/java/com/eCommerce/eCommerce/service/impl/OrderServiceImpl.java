@@ -125,6 +125,21 @@ public class OrderServiceImpl implements OrderService {
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.cancel.success");
     }
 
+    @Override
+    public ApiResponse completeOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EcommerceException("ODR001"));
+
+        if (!order.getStatus().equals(OrderStatus.PENDING)){
+            throw new EcommerceException("ODR006");
+        }
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+
+        return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.complete.success");
+    }
+
 
 }
 
