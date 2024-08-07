@@ -14,9 +14,11 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -24,16 +26,25 @@ import java.util.Set;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+
     private final UserRepository userRepository;
+
     private final AddressRepository addressRepository;
+
     private final PaymentMethodRepository paymentMethodRepository;
+
     private final ProductRepository productRepository;
+
     private final ModelMapper modelMapper;
 
 
     @Override
     @Transactional
     public ApiResponse createOrder(OrderRequest orderRequest, Long userId) {
+
+        if (CollectionUtils.isEmpty(orderRequest.getOrderItems())) {
+            throw new EcommerceException("ODR001");
+        }
 
         Address address = addressRepository.findById(orderRequest.getShippingAddressId())
                 .orElseThrow(() -> new EcommerceException("ADR001"));
@@ -67,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setProduct(product);
             orderItem.setQuantity(itemRequest.getQuantity());
             BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
-            orderItem.setUnitPrice(itemTotalPrice);
+            orderItem.setItemPrice(itemTotalPrice);
 
             orderItems.add(orderItem);
             totalAmount = totalAmount.add(itemTotalPrice);
@@ -82,5 +93,38 @@ public class OrderServiceImpl implements OrderService {
 
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.created.success");
     }
+
+    @Override
+    public ApiResponse findOrders(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+
+        List<Order> orders = orderRepository.findOrdersByUserId(user.getId());
+
+        List<OrderResponse> orderResponses = orders.stream().distinct().map(order -> modelMapper.map(order, OrderResponse.class)).toList();
+
+        return ResponseBuilder.buildSuccessResponse(orderResponses, "message.order.fetch.success");
+    }
+
+    @Override
+    public ApiResponse cancelOrder(Long userId, Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EcommerceException("ODR001"));
+
+        if (!order.getUser().getId().equals(userId)){
+            throw new EcommerceException("ODR003");
+        }
+
+        if (!order.getStatus().equals(OrderStatus.PENDING)){
+            throw new EcommerceException("ODR004");
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
+
+        return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.cancel.success");
+    }
+
+
 }
 

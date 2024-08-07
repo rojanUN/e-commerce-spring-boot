@@ -5,10 +5,12 @@ import com.eCommerce.eCommerce.dto.ProductRequest;
 import com.eCommerce.eCommerce.dto.response.ProductResponse;
 import com.eCommerce.eCommerce.entity.Category;
 import com.eCommerce.eCommerce.entity.Product;
+import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.CategoryRepository;
 import com.eCommerce.eCommerce.repository.ProductRepository;
+import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -24,9 +26,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public ApiResponse createProduct(ProductRequest productRequest) {
+    public ApiResponse createProduct(ProductRequest productRequest, Long adminId) {
         Category category = categoryRepository.findById(productRequest.getCategoryId())
                 .orElseThrow(() -> new EcommerceException("CAT001"));
 

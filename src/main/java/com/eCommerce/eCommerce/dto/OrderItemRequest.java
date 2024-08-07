@@ -19,9 +19,5 @@ public class OrderItemRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
 
-    @NotNull(message = "Unit price cannot be null")
-    @Min(value = 0, message = "Unit price must be a non-negative value")
-    private BigDecimal unitPrice;
-
 }
 

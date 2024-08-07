@@ -20,6 +20,7 @@ public class OrderRequest {
     @NotNull(message = "Payment method ID cannot be null")
     private Long paymentMethodId;
 
+    @NotNull(message = "Order items cannot be null")
     @NotEmpty(message = "Order items cannot be empty")
     @Valid
     private List<OrderItemRequest> orderItems;

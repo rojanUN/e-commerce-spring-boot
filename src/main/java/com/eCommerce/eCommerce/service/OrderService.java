@@ -7,4 +7,7 @@ public interface OrderService {
 
     ApiResponse createOrder(OrderRequest orderRequest, Long userId);
 
+    ApiResponse findOrders(Long userId);
+
+    ApiResponse cancelOrder(Long userId, Long orderId);
 }
