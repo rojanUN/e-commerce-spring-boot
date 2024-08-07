@@ -3,6 +3,7 @@ package com.eCommerce.eCommerce.controller;
 import com.eCommerce.eCommerce.dto.CategoryRequest;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/create")
-    public ApiResponse createCategory(@RequestBody CategoryRequest categoryRequest) {
+    public ApiResponse createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
         return categoryService.createCategory(categoryRequest);
     }
 
@@ -31,7 +32,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}/update")
-    public ApiResponse updateCategory(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
+    public ApiResponse updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest) {
         return categoryService.updateCategory(id, categoryRequest);
     }
 }

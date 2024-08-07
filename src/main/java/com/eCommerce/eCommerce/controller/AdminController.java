@@ -3,6 +3,7 @@ package com.eCommerce.eCommerce.controller;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
 import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,7 +20,7 @@ public class AdminController {
 
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<User> createAdministrator(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<User> createAdministrator(@Valid @RequestBody RegisterUserDto registerUserDto) {
         User createdAdmin = userService.createAdministrator(registerUserDto);
 
         return ResponseEntity.ok(createdAdmin);

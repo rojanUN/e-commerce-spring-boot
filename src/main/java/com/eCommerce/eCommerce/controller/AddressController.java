@@ -4,6 +4,7 @@ import com.eCommerce.eCommerce.dto.AddressRequest;
 import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.service.AddressService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +19,7 @@ public class AddressController {
     private final AddressService addressService;
 
     @PostMapping("/add")
-    public ApiResponse addAddress(@RequestBody AddressRequest addressRequest, @AuthenticationPrincipal User user) {
+    public ApiResponse addAddress(@Valid @RequestBody AddressRequest addressRequest, @AuthenticationPrincipal User user) {
         return addressService.addAddress(user.getId(), addressRequest);
     }
 
@@ -33,7 +34,7 @@ public class AddressController {
     }
 
     @PutMapping("/update/{id}")
-    public ApiResponse updateAddress(@PathVariable Long id, @RequestBody AddressRequest addressRequest, @AuthenticationPrincipal User user) {
+    public ApiResponse updateAddress(@PathVariable Long id, @Valid @RequestBody AddressRequest addressRequest, @AuthenticationPrincipal User user) {
         return addressService.updateAddress(user.getId(), id, addressRequest);
     }
 
