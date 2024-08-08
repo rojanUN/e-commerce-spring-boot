@@ -10,6 +10,7 @@ import com.eCommerce.eCommerce.repository.CategoryRepository;
 import com.eCommerce.eCommerce.repository.ProductRepository;
 import com.eCommerce.eCommerce.service.CategoryService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -25,50 +27,69 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final ModelMapper modelMapper;
 
-
     @Override
     public ApiResponse createCategory(CategoryRequest categoryRequest) {
+        log.info("Creating category with name: {}", categoryRequest.getName());
+
         Category category = new Category();
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
+
         CategoryResponse categoryResponse = new CategoryResponse();
-        modelMapper.map(categoryRequest, categoryResponse);
+        modelMapper.map(category, categoryResponse);
+
+        log.info("Category created successfully with ID: {}", category.getId());
         return ResponseBuilder.buildSuccessResponse(categoryResponse, "message.category.created.success");
     }
 
     @Override
     public ApiResponse findCategories() {
+        log.info("Fetching all categories");
+
         List<Category> categories = categoryRepository.findAll();
         List<CategoryResponse> categoryResponses = categories.stream()
                 .map(category -> modelMapper.map(category, CategoryResponse.class))
                 .toList();
 
+        log.info("Fetched {} categories", categoryResponses.size());
         return ResponseBuilder.buildSuccessResponse(categoryResponses);
     }
 
     @Override
     public ApiResponse deleteCategoryById(Long id) {
+        log.info("Deleting category with ID: {}", id);
+
         if (!categoryRepository.existsById(id)) {
+            log.error("Category with ID: {} not found", id);
             throw new EcommerceException("CAT001");
         }
 
         try {
             productRepository.deleteByCategoryId(id);
             categoryRepository.deleteById(id);
+            log.info("Category with ID: {} deleted successfully", id);
             return ResponseBuilder.buildSuccessResponse("message.category.deleted.success");
         } catch (Exception e) {
+            log.error("Error deleting category with ID: {}", id, e);
             throw new EcommerceException("CAT002");
         }
     }
 
     @Override
     public ApiResponse updateCategory(Long id, CategoryRequest categoryRequest) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new EcommerceException("CAT001"));
+        log.info("Updating category with ID: {}", id);
+
+        Category category = categoryRepository.findById(id).orElseThrow(() -> {
+            log.error("Category with ID: {} not found", id);
+            return new EcommerceException("CAT001");
+        });
+
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
+
         CategoryResponse categoryResponse = modelMapper.map(category, CategoryResponse.class);
+
+        log.info("Category with ID: {} updated successfully", id);
         return ResponseBuilder.buildSuccessResponse(categoryResponse, "message.category.updated.success");
     }
-
-
 }
