@@ -12,6 +12,7 @@ import com.eCommerce.eCommerce.repository.*;
 import com.eCommerce.eCommerce.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -23,6 +24,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -37,28 +39,43 @@ public class OrderServiceImpl implements OrderService {
 
     private final ModelMapper modelMapper;
 
-
     @Override
     @Transactional
     public ApiResponse createOrder(OrderRequest orderRequest, Long userId) {
+        log.info("Creating order for user ID: {}", userId);
 
         if (CollectionUtils.isEmpty(orderRequest.getOrderItems())) {
+            log.error("Order creation failed: Order items are empty");
             throw new EcommerceException("ODR001");
         }
 
         Address address = addressRepository.findById(orderRequest.getShippingAddressId())
-                .orElseThrow(() -> new EcommerceException("ADR001"));
+                .orElseThrow(() -> {
+                    log.error("Shipping address with ID: {} not found", orderRequest.getShippingAddressId());
+                    return new EcommerceException("ADR001");
+                });
+
         if (!address.getUser().getId().equals(userId)) {
+            log.error("Address ID: {} does not belong to user ID: {}", orderRequest.getShippingAddressId(), userId);
             throw new EcommerceException("ADR002");
         }
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(orderRequest.getPaymentMethodId())
-                .orElseThrow(() -> new EcommerceException("PMT001"));
+                .orElseThrow(() -> {
+                    log.error("Payment method with ID: {} not found", orderRequest.getPaymentMethodId());
+                    return new EcommerceException("PMT001");
+                });
+
         if (!paymentMethod.getUser().getId().equals(userId)) {
+            log.error("Payment method ID: {} does not belong to user ID: {}", orderRequest.getPaymentMethodId(), userId);
             throw new EcommerceException("PMT001");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("User with ID: {} not found", userId);
+                    return new EcommerceException("USR001");
+                });
 
         Order order = new Order();
         order.setUser(user);
@@ -71,7 +88,10 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
             Product product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new EcommerceException("PRD001"));
+                    .orElseThrow(() -> {
+                        log.error("Product with ID: {} not found", itemRequest.getProductId());
+                        return new EcommerceException("PRD001");
+                    });
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -91,55 +111,80 @@ public class OrderServiceImpl implements OrderService {
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 
+        log.info("Order created successfully with ID: {}", order.getId());
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.created.success");
     }
 
     @Override
     public ApiResponse findOrders(Long userId) {
+        log.info("Finding orders for user ID: {}", userId);
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("User with ID: {} not found", userId);
+                    return new EcommerceException("USR001");
+                });
 
         List<Order> orders = orderRepository.findOrdersByUserId(user.getId());
 
-        List<OrderResponse> orderResponses = orders.stream().distinct().map(order -> modelMapper.map(order, OrderResponse.class)).toList();
+        List<OrderResponse> orderResponses = orders.stream().distinct()
+                .map(order -> modelMapper.map(order, OrderResponse.class))
+                .toList();
 
+        log.info("Found {} orders for user ID: {}", orderResponses.size(), userId);
         return ResponseBuilder.buildSuccessResponse(orderResponses, "message.order.fetch.success");
     }
 
     @Override
     public ApiResponse cancelOrder(Long userId, Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EcommerceException("ODR001"));
+        log.info("Cancelling order ID: {} for user ID: {}", orderId, userId);
 
-        if (!order.getUser().getId().equals(userId)){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> {
+                    log.error("Order with ID: {} not found", orderId);
+                    return new EcommerceException("ODR001");
+                });
+
+        if (!order.getUser().getId().equals(userId)) {
+            log.error("User ID: {} does not match the owner of order ID: {}", userId, orderId);
             throw new EcommerceException("ODR003");
         }
 
-        if (!order.getStatus().equals(OrderStatus.PENDING)){
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
+            log.error("Order ID: {} is not in PENDING status", orderId);
             throw new EcommerceException("ODR004");
         }
+
         order.setStatus(OrderStatus.CANCELLED);
         orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 
+        log.info("Order ID: {} cancelled successfully", orderId);
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.cancel.success");
     }
 
     @Override
     public ApiResponse completeOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new EcommerceException("ODR001"));
+        log.info("Completing order ID: {}", orderId);
 
-        if (!order.getStatus().equals(OrderStatus.PENDING)){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> {
+                    log.error("Order with ID: {} not found", orderId);
+                    return new EcommerceException("ODR001");
+                });
+
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
+            log.error("Order ID: {} is not in PENDING status", orderId);
             throw new EcommerceException("ODR006");
         }
+
         order.setStatus(OrderStatus.COMPLETED);
         orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 
+        log.info("Order ID: {} completed successfully", orderId);
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.complete.success");
     }
-
-
 }
-

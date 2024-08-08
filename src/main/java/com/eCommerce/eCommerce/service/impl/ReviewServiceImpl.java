@@ -15,6 +15,7 @@ import com.eCommerce.eCommerce.repository.ReviewRepository;
 import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.service.ReviewService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -31,54 +33,78 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
 
     private final UserRepository userRepository;
+    
     private final ModelMapper modelMapper;
 
     @Override
     public ApiResponse submitReview(Long userId, ReviewRequest reviewRequest) {
+        log.info("Submitting review for product ID: {} by user ID: {}", reviewRequest.getProductId(), userId);
 
         Product product = productRepository
                 .findById(reviewRequest.getProductId())
-                .orElseThrow(() -> new EcommerceException("PRO001"));
+                .orElseThrow(() -> {
+                    log.error("Product with ID: {} not found", reviewRequest.getProductId());
+                    return new EcommerceException("PRO001");
+                });
+
         List<Order> completedOrders = orderRepository.findByUserIdAndProductIdAndStatus(userId, reviewRequest.getProductId(), OrderStatus.COMPLETED);
-        if ((completedOrders.isEmpty())) {
+        if (completedOrders.isEmpty()) {
+            log.error("No completed orders found for user ID: {} and product ID: {}", userId, reviewRequest.getProductId());
             throw new EcommerceException("ODR005");
         }
 
         boolean reviewExists = reviewRepository.existsByUserIdAndProductId(userId, reviewRequest.getProductId());
         if (reviewExists) {
+            log.error("Review already exists for user ID: {} and product ID: {}", userId, reviewRequest.getProductId());
             throw new EcommerceException("REV003");
         }
 
         Review review = new Review();
-        review.setUser(userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001")));
+        review.setUser(userRepository.findById(userId).orElseThrow(() -> {
+            log.error("User with ID: {} not found", userId);
+            return new EcommerceException("USR001");
+        }));
         review.setProduct(product);
         review.setComment(reviewRequest.getComment());
         review.setRating(reviewRequest.getRating());
 
         reviewRepository.save(review);
+        log.info("Review submitted successfully for product ID: {} by user ID: {}", reviewRequest.getProductId(), userId);
 
         return ResponseBuilder.buildSuccessResponse("message.review.submit.success");
-
     }
 
     @Override
     public ApiResponse removeReview(Long userId, Long reviewId) {
+        log.info("Removing review with ID: {} by user ID: {}", reviewId, userId);
 
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new EcommerceException("REV001"));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+            log.error("Review with ID: {} not found", reviewId);
+            return new EcommerceException("REV001");
+        });
 
         if (!review.getUser().getId().equals(userId)) {
+            log.error("User ID: {} does not match review owner ID: {}", userId, review.getUser().getId());
             throw new EcommerceException("REV002");
         }
-        reviewRepository.delete(review);
-        return ResponseBuilder.buildSuccessResponse("message.review.delete.success");
 
+        reviewRepository.delete(review);
+        log.info("Review with ID: {} removed successfully by user ID: {}", reviewId, userId);
+
+        return ResponseBuilder.buildSuccessResponse("message.review.delete.success");
     }
 
     @Override
     public ApiResponse updateReview(Long userId, Long reviewId, ReviewRequest reviewRequest) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new EcommerceException("REV001"));
+        log.info("Updating review with ID: {} by user ID: {}", reviewId, userId);
+
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
+            log.error("Review with ID: {} not found", reviewId);
+            return new EcommerceException("REV001");
+        });
 
         if (!review.getUser().getId().equals(userId)) {
+            log.error("User ID: {} does not match review owner ID: {}", userId, review.getUser().getId());
             throw new EcommerceException("REV002");
         }
 
@@ -86,16 +112,20 @@ public class ReviewServiceImpl implements ReviewService {
         review.setRating(reviewRequest.getRating());
         reviewRepository.save(review);
 
-        ReviewResponse reviewResponse = new ReviewResponse();
-        modelMapper.map(review, reviewResponse);
-
+        ReviewResponse reviewResponse = modelMapper.map(review, ReviewResponse.class);
+        log.info("Review with ID: {} updated successfully by user ID: {}", reviewId, userId);
 
         return ResponseBuilder.buildSuccessResponse(reviewResponse, "message.review.update.success");
     }
 
     @Override
     public ApiResponse findReviewByUser(Long userId) {
+        log.info("Fetching reviews for user ID: {}", userId);
+
         List<Review> reviews = reviewRepository.findByUserId(userId);
+        if (reviews.isEmpty()) {
+            log.info("No reviews found for user ID: {}", userId);
+        }
 
         List<ReviewResponse> reviewResponses = reviews.stream()
                 .map(review -> modelMapper.map(review, ReviewResponse.class))
@@ -103,5 +133,4 @@ public class ReviewServiceImpl implements ReviewService {
 
         return ResponseBuilder.buildSuccessResponse(reviewResponses, "message.review.fetch.success");
     }
-
 }
