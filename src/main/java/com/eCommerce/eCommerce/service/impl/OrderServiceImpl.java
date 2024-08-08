@@ -38,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
 
     private final ModelMapper modelMapper;
+    private final OrderItemRepository orderItemRepository;
 
     @Override
     @Transactional
@@ -102,6 +103,17 @@ public class OrderServiceImpl implements OrderService {
 
             orderItems.add(orderItem);
             totalAmount = totalAmount.add(itemTotalPrice);
+
+            if (itemRequest.getQuantity() > product.getStock()) {
+                log.error("Insufficient stock for product ID: {}. Requested: {}, Available: {}",
+                        itemRequest.getProductId(), itemRequest.getQuantity(), product.getStock());
+                throw new EcommerceException("PRO003");
+            }
+            else {
+                product.setStock(product.getStock() - orderItem.getQuantity());
+                productRepository.save(product);
+            }
+
         }
 
         order.setOrderItems(orderItems);
@@ -151,11 +163,15 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (!order.getStatus().equals(OrderStatus.PENDING)) {
-            log.error("Order ID: {} is not in PENDING status", orderId);
+            log.error("Order ID: {} is already SHIPPED", orderId);
             throw new EcommerceException("ODR004");
         }
 
         order.setStatus(OrderStatus.CANCELLED);
+        OrderItem orderItem = orderItemRepository.findOrderItemByOrderId(orderId);
+        int quantity = orderItem.getQuantity();
+        Product product = productRepository.findById(orderItem.getProduct().getId()).orElseThrow(() -> new EcommerceException("PRO001"));
+        product.setStock(product.getStock() + quantity);
         orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
@@ -180,7 +196,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.setStatus(OrderStatus.COMPLETED);
-        orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 

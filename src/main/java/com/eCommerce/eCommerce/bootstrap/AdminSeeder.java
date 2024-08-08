@@ -17,6 +17,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Component
 public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
+
     private final RoleRepository roleRepository;
 
     private final UserRepository userRepository;
@@ -30,7 +31,7 @@ public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
 
     private void createSuperAdministrator() {
         RegisterUserDto userDto = new RegisterUserDto();
-            userDto.setFullName("Super Admin").setEmail("super.admin@email.com").setPassword("123456");
+        userDto.setFullName("Super Admin").setEmail("super.admin@email.com").setPassword("123456");
 
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.SUPER_ADMIN);
         Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());

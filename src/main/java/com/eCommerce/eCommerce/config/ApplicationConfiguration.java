@@ -1,6 +1,7 @@
 package com.eCommerce.eCommerce.config;
 
 import com.eCommerce.eCommerce.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -15,12 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
+@AllArgsConstructor
 public class ApplicationConfiguration {
-    private final UserRepository userRepository;
 
-    public ApplicationConfiguration(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private final UserRepository userRepository;
 
     @Bean
     UserDetailsService userDetailsService() {
@@ -49,7 +48,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public ModelMapper modelMapper(){
+    public ModelMapper modelMapper() {
         return new ModelMapper(
 
         );
@@ -70,7 +69,6 @@ public class ApplicationConfiguration {
         errorSource.setDefaultEncoding("UTF-8");
         return errorSource;
     }
-
 
 
 }
