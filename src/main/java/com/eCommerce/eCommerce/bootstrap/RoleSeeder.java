@@ -3,6 +3,7 @@ package com.eCommerce.eCommerce.bootstrap;
 import com.eCommerce.eCommerce.entity.Role;
 import com.eCommerce.eCommerce.enums.RoleEnum;
 import com.eCommerce.eCommerce.repository.RoleRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
