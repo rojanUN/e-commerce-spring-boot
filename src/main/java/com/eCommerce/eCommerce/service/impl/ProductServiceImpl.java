@@ -2,6 +2,7 @@ package com.eCommerce.eCommerce.service.impl;
 
 import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.ProductRequest;
+import com.eCommerce.eCommerce.dto.ProductSearchFilterPaginationRequest;
 import com.eCommerce.eCommerce.dto.response.ProductResponse;
 import com.eCommerce.eCommerce.entity.Category;
 import com.eCommerce.eCommerce.entity.Product;
@@ -9,13 +10,21 @@ import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.*;
 import com.eCommerce.eCommerce.service.ProductService;
+import com.eCommerce.eCommerce.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -106,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
             orderItemRepository.softDeleteByProductId(id);
 //            productRepository.deleteById(id);
             productRepository.softDeleteById(id);
-            
+
             log.info("Product with ID: {} removed successfully", id);
             return ResponseBuilder.buildSuccessResponse("message.product.deleted.success");
         } catch (Exception e) {
@@ -135,6 +144,31 @@ public class ProductServiceImpl implements ProductService {
                 product.getCategory();
 
         return getApiResponse(productRequest, category, product);
+    }
+
+    @Override
+    public ApiResponse productList(ProductSearchFilterPaginationRequest request) {
+        Pageable pageable = PageRequest.of(request.getPageNo(), request.getPageSize(),
+                Sort.by(Objects.equals(request.getDirection(), "asc") ?
+                             Sort.Direction.ASC : Sort.Direction.DESC,request.getSortBy() == null
+                        ? "createdAt" :request.getSortBy()
+                        )
+                );
+
+        Specification<Product> specification = ProductSpecification.productFilterSearch(request);
+        Page<Product> productPage = productRepository.findAll(specification, pageable);
+        List<Product> productList = productPage.getContent();
+
+        List<ProductResponse> productResponseList =
+                productList.stream()
+                                .map(product -> {
+                                    ProductResponse productResponse = new ModelMapper().map(product, ProductResponse.class);
+                                    return
+                                })
+
+
+        ResponseBuilder.buildSuccessResponse(productList);
+
     }
 
 }
