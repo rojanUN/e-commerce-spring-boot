@@ -38,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
 
     private final ModelMapper modelMapper;
+
     private final OrderItemRepository orderItemRepository;
 
     @Override
@@ -50,11 +51,23 @@ public class OrderServiceImpl implements OrderService {
             throw new EcommerceException("ODR001");
         }
 
-        Address address = addressRepository.findById(orderRequest.getShippingAddressId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.error("Shipping address with ID: {} not found", orderRequest.getShippingAddressId());
-                    return new EcommerceException("ADR001");
+                    log.error("User with ID: {} not found", userId);
+                    return new EcommerceException("USR001");
                 });
+
+        Address address = (orderRequest.getShippingAddressId() == null) ?
+                addressRepository.findByUserIdAndIsDefaultTrue(userId)
+                        .orElseThrow(() -> {
+                            log.error("Default shipping address for user ID: {} not found", userId);
+                            return new EcommerceException("ADR003");
+                        }) :
+                addressRepository.findById(orderRequest.getShippingAddressId())
+                        .orElseThrow(() -> {
+                            log.error("Shipping address with ID: {} not found", orderRequest.getShippingAddressId());
+                            return new EcommerceException("ADR001");
+                        });
 
         if (!address.getUser().getId().equals(userId)) {
             log.error("Address ID: {} does not belong to user ID: {}", orderRequest.getShippingAddressId(), userId);
@@ -72,17 +85,11 @@ public class OrderServiceImpl implements OrderService {
             throw new EcommerceException("PMT001");
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.error("User with ID: {} not found", userId);
-                    return new EcommerceException("USR001");
-                });
-
         Order order = new Order();
         order.setUser(user);
-        order.setShippingAddress(address);
         order.setPaymentMethod(paymentMethod);
         order.setStatus(OrderStatus.PENDING);
+        order.setShippingAddress(address);
 
         Set<OrderItem> orderItems = new HashSet<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -94,6 +101,12 @@ public class OrderServiceImpl implements OrderService {
                         return new EcommerceException("PRD001");
                     });
 
+            if (itemRequest.getQuantity() > product.getStock()) {
+                log.error("Insufficient stock for product ID: {}. Requested: {}, Available: {}",
+                        itemRequest.getProductId(), itemRequest.getQuantity(), product.getStock());
+                throw new EcommerceException("PRO003");
+            }
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);
@@ -104,28 +117,20 @@ public class OrderServiceImpl implements OrderService {
             orderItems.add(orderItem);
             totalAmount = totalAmount.add(itemTotalPrice);
 
-            if (itemRequest.getQuantity() > product.getStock()) {
-                log.error("Insufficient stock for product ID: {}. Requested: {}, Available: {}",
-                        itemRequest.getProductId(), itemRequest.getQuantity(), product.getStock());
-                throw new EcommerceException("PRO003");
-            }
-            else {
-                product.setStock(product.getStock() - orderItem.getQuantity());
-                productRepository.save(product);
-            }
-
+            product.setStock(product.getStock() - itemRequest.getQuantity());
+            productRepository.save(product);
         }
 
         order.setOrderItems(orderItems);
         order.setTotalAmount(totalAmount);
-
         orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
-
         log.info("Order created successfully with ID: {}", order.getId());
+
         return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.created.success");
     }
+
 
     @Override
     public ApiResponse findOrders(Long userId) {

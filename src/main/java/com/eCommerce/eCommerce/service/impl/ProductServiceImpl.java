@@ -7,9 +7,7 @@ import com.eCommerce.eCommerce.entity.Category;
 import com.eCommerce.eCommerce.entity.Product;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
-import com.eCommerce.eCommerce.repository.CategoryRepository;
-import com.eCommerce.eCommerce.repository.ProductRepository;
-import com.eCommerce.eCommerce.repository.UserRepository;
+import com.eCommerce.eCommerce.repository.*;
 import com.eCommerce.eCommerce.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -28,6 +26,9 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final WishListItemRepository wishListItemRepository;
+    private final ReviewRepository reviewRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Override
     public ApiResponse createProduct(ProductRequest productRequest) {
@@ -90,6 +91,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ApiResponse removeProduct(Long id) {
         log.info("Removing product with ID: {}", id);
 
@@ -99,7 +101,12 @@ public class ProductServiceImpl implements ProductService {
         }
 
         try {
-            productRepository.deleteById(id);
+            reviewRepository.softDeleteByProductId(id);
+            wishListItemRepository.softDeleteByProductId(id);
+            orderItemRepository.softDeleteByProductId(id);
+//            productRepository.deleteById(id);
+            productRepository.softDeleteById(id);
+            
             log.info("Product with ID: {} removed successfully", id);
             return ResponseBuilder.buildSuccessResponse("message.product.deleted.success");
         } catch (Exception e) {
