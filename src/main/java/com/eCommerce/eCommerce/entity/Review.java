@@ -33,4 +33,6 @@ public class Review {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    private boolean softDeleted = false;
+
 }

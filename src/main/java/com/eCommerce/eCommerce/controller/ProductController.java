@@ -1,10 +1,13 @@
 package com.eCommerce.eCommerce.controller;
 
 import com.eCommerce.eCommerce.dto.ProductRequest;
+import com.eCommerce.eCommerce.dto.ProductSearchFilterPaginationRequest;
 import com.eCommerce.eCommerce.model.ApiResponse;
+import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +44,11 @@ public class ProductController {
     @PutMapping("/{id}/update")
     public ApiResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest) {
         return productService.updateProduct(id, productRequest);
+    }
+
+    @PostMapping("/list")
+    public ResponseEntity<Response> listProduct(@RequestBody ProductSearchFilterPaginationRequest request) {
+        return ResponseEntity.ok(productService.productList(request));
     }
 
 }

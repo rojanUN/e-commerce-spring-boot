@@ -18,8 +18,10 @@ public class WishListItem {
     @JoinColumn(name = "wishList_id", nullable = false)
     private WishList wishList;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    private boolean softDeleted = false;
 
 }
