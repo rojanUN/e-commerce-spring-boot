@@ -11,8 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/orders")
 @AllArgsConstructor
+@RequestMapping("/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -31,16 +31,15 @@ public class OrderController {
 
     @PutMapping("/{orderId}/cancel")
     @PreAuthorize("hasRole('USER')")
-    public ApiResponse cancelOrder(@PathVariable Long orderId, @AuthenticationPrincipal User user){
+    public ApiResponse cancelOrder(@PathVariable Long orderId, @AuthenticationPrincipal User user) {
         return orderService.cancelOrder(user.getId(), orderId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{orderId}/complete")
-    public ApiResponse completeOrder(@PathVariable Long orderId){
+    public ApiResponse completeOrder(@PathVariable Long orderId) {
         return orderService.completeOrder(orderId);
     }
-
 
 
 }

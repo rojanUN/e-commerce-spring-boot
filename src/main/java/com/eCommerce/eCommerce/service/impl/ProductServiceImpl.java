@@ -148,6 +148,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse productList(ProductSearchFilterPaginationRequest request) {
+        log.info("Fetching Paginated Product response");
         Pageable pageable = PageRequest.of(request.getPageNo(), request.getPageSize(),
                 Sort.by(Objects.equals(request.getDirection(), "asc") ?
                         Sort.Direction.ASC : Sort.Direction.DESC, request.getSortBy() == null
@@ -170,7 +171,7 @@ public class ProductServiceImpl implements ProductService {
                 .result(productResponseList)
                 .build();
 
-
+        log.info("Product page with {} records found", dataPaginationResponse.getTotalElementCount());
         return ResponseBuilder.buildSuccessResponse(dataPaginationResponse);
 
     }

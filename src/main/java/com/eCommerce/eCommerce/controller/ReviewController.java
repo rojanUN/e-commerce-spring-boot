@@ -11,8 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("reviews")
 @AllArgsConstructor
+@RequestMapping("reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;

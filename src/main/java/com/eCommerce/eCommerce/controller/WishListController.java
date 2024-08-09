@@ -4,11 +4,13 @@ import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.service.WishListService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
+@PreAuthorize("hasRole('USER')")
 @RequestMapping("/wish-lists")
 public class WishListController {
 

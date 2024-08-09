@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/auth")
 @RestController
+@RequestMapping("/auth")
 public class AuthenticationController {
     private final JwtService jwtService;
 
@@ -43,3 +43,4 @@ public class AuthenticationController {
         return ResponseEntity.ok(loginResponse);
     }
 }
+
