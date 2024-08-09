@@ -15,4 +15,5 @@ public class ProductResponse {
     private Integer stock;
     private Long categoryId;
     private String categoryName;
+    private boolean softDeleted;
 }

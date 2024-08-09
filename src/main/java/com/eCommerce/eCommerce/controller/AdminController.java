@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @AllArgsConstructor
-@RequestMapping("/admins")
 @RestController
+@RequestMapping("/admins")
 public class AdminController {
     private final UserService userService;
 
@@ -22,7 +22,7 @@ public class AdminController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<User> createAdministrator(@Valid @RequestBody RegisterUserDto registerUserDto) {
         User createdAdmin = userService.createAdministrator(registerUserDto);
-
         return ResponseEntity.ok(createdAdmin);
     }
 }
+
