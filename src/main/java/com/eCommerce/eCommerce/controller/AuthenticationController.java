@@ -4,9 +4,12 @@ import com.eCommerce.eCommerce.dto.LoginUserDto;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
 import com.eCommerce.eCommerce.dto.response.LoginResponse;
 import com.eCommerce.eCommerce.entity.User;
-import com.eCommerce.eCommerce.service.impl.AuthenticationService;
+import com.eCommerce.eCommerce.model.ApiResponse;
+import com.eCommerce.eCommerce.model.Response;
+import com.eCommerce.eCommerce.service.AuthenticationService;
 import com.eCommerce.eCommerce.service.impl.JwtService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,29 +17,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/auth")
 public class AuthenticationController {
     private final JwtService jwtService;
 
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
-    }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
-
-        return ResponseEntity.ok(registeredUser);
+    public ResponseEntity<Response> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        return ResponseEntity.ok(authenticationService.signup(registerUserDto));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+        ApiResponse authenticatedUser = authenticationService.authenticate(loginUserDto);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        User user = (User) authenticatedUser.getData();
+        String jwtToken = jwtService.generateToken(user);
 
         LoginResponse loginResponse = new LoginResponse().setToken(jwtToken).setExpiresIn(jwtService.getExpirationTime());
 

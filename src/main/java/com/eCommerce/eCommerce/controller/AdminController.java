@@ -1,7 +1,7 @@
 package com.eCommerce.eCommerce.controller;
 
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
-import com.eCommerce.eCommerce.entity.User;
+import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,9 +20,8 @@ public class AdminController {
 
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<User> createAdministrator(@Valid @RequestBody RegisterUserDto registerUserDto) {
-        User createdAdmin = userService.createAdministrator(registerUserDto);
-        return ResponseEntity.ok(createdAdmin);
+    public ResponseEntity<Response> createAdministrator(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        return ResponseEntity.ok(userService.createAdministrator(registerUserDto));
     }
 }
 

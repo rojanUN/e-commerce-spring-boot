@@ -2,7 +2,6 @@ package com.eCommerce.eCommerce.controller;
 
 import com.eCommerce.eCommerce.dto.PaymentMethodRequest;
 import com.eCommerce.eCommerce.entity.User;
-import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.PaymentMethodService;
 import jakarta.validation.Valid;
@@ -27,20 +26,20 @@ public class PaymentMethodController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/")
-    public ApiResponse getPaymentMethod(@AuthenticationPrincipal User user) {
-        return paymentMethodService.findAllPaymentMethodByUserId(user.getId());
+    public ResponseEntity<Response> getPaymentMethod(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(paymentMethodService.findAllPaymentMethodByUserId(user.getId()));
     }
 
     @PreAuthorize("hasAnyRole('USER', 'SUPER_ADMIN')")
     @DeleteMapping("/remove/{id}")
-    public ApiResponse removePaymentMethod(@AuthenticationPrincipal User user, @PathVariable Long id) {
-        return paymentMethodService.removePaymentMethod(user.getId(), id);
+    public ResponseEntity<Response> removePaymentMethod(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        return ResponseEntity.ok(paymentMethodService.removePaymentMethod(user.getId(), id));
     }
 
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/update/{id}")
-    public ApiResponse updatePaymentMethod(@PathVariable Long id, @Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
-        return paymentMethodService.updatePaymentMethod(user.getId(), id, paymentMethodRequest);
+    public ResponseEntity<Response> updatePaymentMethod(@PathVariable Long id, @Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(paymentMethodService.updatePaymentMethod(user.getId(), id, paymentMethodRequest));
     }
 
 }

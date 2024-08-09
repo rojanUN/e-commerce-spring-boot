@@ -1,14 +1,19 @@
 package com.eCommerce.eCommerce.service.impl;
 
+import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
+import com.eCommerce.eCommerce.dto.response.UserResponse;
 import com.eCommerce.eCommerce.entity.Role;
 import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.enums.RoleEnum;
+import com.eCommerce.eCommerce.exceptions.EcommerceException;
+import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.RoleRepository;
 import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +30,31 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
-    public List<User> allUsers() {
+    @Override
+    public ApiResponse allUsers() {
         log.info("Fetching all users");
         List<User> users = new ArrayList<>();
 
         userRepository.findAll().forEach(users::add);
 
         log.info("Fetched {} users", users.size());
-        return users;
+        List<UserResponse> userResponses = users.stream().map(
+                        user -> modelMapper.map(user, UserResponse.class))
+                .toList();
+        return ResponseBuilder.buildSuccessResponse(userResponses);
     }
 
-    public User createAdministrator(RegisterUserDto input) {
+    @Override
+    public ApiResponse getAuthenticatedUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+        UserResponse userResponse = modelMapper.map(user, UserResponse.class);
+        return ResponseBuilder.buildSuccessResponse(userResponse);
+    }
+
+    @Override
+    public ApiResponse createAdministrator(RegisterUserDto input) {
         log.info("Creating administrator with email: {}", input.getEmail());
 
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.ADMIN);
@@ -53,8 +71,8 @@ public class UserServiceImpl implements UserService {
                 .setRole(optionalRole.get());
 
         User savedUser = userRepository.save(user);
-
+        UserResponse userResponse = modelMapper.map(savedUser, UserResponse.class);
         log.info("Created administrator with ID: {}", savedUser.getId());
-        return savedUser;
+        return ResponseBuilder.buildSuccessResponse(userResponse);
     }
 }
