@@ -7,6 +7,7 @@ import com.eCommerce.eCommerce.dto.response.UserResponse;
 import com.eCommerce.eCommerce.entity.Role;
 import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.enums.RoleEnum;
+import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.RoleRepository;
 import com.eCommerce.eCommerce.repository.UserRepository;
@@ -44,10 +45,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (optionalRole.isEmpty()) {
             log.error("Role USER not found in the database");
-            return null;
+            throw new EcommerceException("ROL001");
         }
 
-        var user = new User()
+        User user = new User()
                 .setFullName(input.getFullName())
                 .setEmail(input.getEmail())
                 .setPassword(passwordEncoder.encode(input.getPassword()))

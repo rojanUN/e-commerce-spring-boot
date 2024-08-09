@@ -42,7 +42,7 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
     @Override
