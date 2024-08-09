@@ -1,10 +1,11 @@
 package com.eCommerce.eCommerce.controller;
 
 import com.eCommerce.eCommerce.dto.CategoryRequest;
-import com.eCommerce.eCommerce.model.ApiResponse;
+import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,22 +18,22 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/create")
-    public ApiResponse createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
-        return categoryService.createCategory(categoryRequest);
+    public ResponseEntity<Response> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
+        return ResponseEntity.ok(categoryService.createCategory(categoryRequest));
     }
 
     @GetMapping("/find-all")
-    public ApiResponse findCategories() {
-        return categoryService.findCategories();
+    public ResponseEntity<Response> findCategories() {
+        return ResponseEntity.ok(categoryService.findCategories());
     }
 
     @DeleteMapping("/{id}/remove")
-    public ApiResponse deleteCategory(@PathVariable Long id) {
-        return categoryService.deleteCategoryById(id);
+    public ResponseEntity<Response> deleteCategory(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.deleteCategoryById(id));
     }
 
     @PutMapping("/{id}/update")
-    public ApiResponse updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest) {
-        return categoryService.updateCategory(id, categoryRequest);
+    public ResponseEntity<Response> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, categoryRequest));
     }
 }

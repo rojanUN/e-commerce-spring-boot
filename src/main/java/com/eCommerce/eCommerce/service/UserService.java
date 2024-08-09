@@ -1,14 +1,14 @@
 package com.eCommerce.eCommerce.service;
 
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
-import com.eCommerce.eCommerce.entity.User;
-
-import java.util.List;
+import com.eCommerce.eCommerce.model.ApiResponse;
 
 public interface UserService {
 
-    List<User> allUsers();
+    ApiResponse allUsers();
 
-    User createAdministrator(RegisterUserDto input);
+    ApiResponse createAdministrator(RegisterUserDto input);
+
+    public ApiResponse getAuthenticatedUser(Long userId);
 
 }

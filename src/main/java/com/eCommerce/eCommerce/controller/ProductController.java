@@ -2,7 +2,6 @@ package com.eCommerce.eCommerce.controller;
 
 import com.eCommerce.eCommerce.dto.ProductRequest;
 import com.eCommerce.eCommerce.dto.ProductSearchFilterPaginationRequest;
-import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.ProductService;
 import jakarta.validation.Valid;
@@ -20,30 +19,30 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
-    public ApiResponse createProduct(@Valid @RequestBody ProductRequest productRequest) {
-        return productService.createProduct(productRequest);
+    public ResponseEntity<Response> createProduct(@Valid @RequestBody ProductRequest productRequest) {
+        return ResponseEntity.ok(productService.createProduct(productRequest));
     }
 
     @GetMapping("/find-all")
-    public ApiResponse findAllProducts() {
-        return productService.findAllProducts();
+    public ResponseEntity<Response> findAllProducts() {
+        return ResponseEntity.ok(productService.findAllProducts());
     }
 
     @GetMapping("/{id}/find")
-    public ApiResponse findProductById(@PathVariable Long id) {
-        return productService.findProductById(id);
+    public ResponseEntity<Response> findProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.findProductById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/remove")
-    public ApiResponse removeProductById(@PathVariable Long id) {
-        return productService.removeProduct(id);
+    public ResponseEntity<Response> removeProductById(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.removeProduct(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/update")
-    public ApiResponse updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest) {
-        return productService.updateProduct(id, productRequest);
+    public ResponseEntity<Response> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest) {
+        return ResponseEntity.ok(productService.updateProduct(id, productRequest));
     }
 
     @PostMapping("/list")
