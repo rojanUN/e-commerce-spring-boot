@@ -3,6 +3,7 @@ package com.eCommerce.eCommerce.service.impl;
 import com.eCommerce.eCommerce.builder.ResponseBuilder;
 import com.eCommerce.eCommerce.dto.ProductRequest;
 import com.eCommerce.eCommerce.dto.ProductSearchFilterPaginationRequest;
+import com.eCommerce.eCommerce.dto.response.DataPaginationResponse;
 import com.eCommerce.eCommerce.dto.response.ProductResponse;
 import com.eCommerce.eCommerce.entity.Category;
 import com.eCommerce.eCommerce.entity.Product;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -150,10 +150,10 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse productList(ProductSearchFilterPaginationRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNo(), request.getPageSize(),
                 Sort.by(Objects.equals(request.getDirection(), "asc") ?
-                             Sort.Direction.ASC : Sort.Direction.DESC,request.getSortBy() == null
-                        ? "createdAt" :request.getSortBy()
-                        )
-                );
+                        Sort.Direction.ASC : Sort.Direction.DESC, request.getSortBy() == null
+                        ? "createdAt" : request.getSortBy()
+                )
+        );
 
         Specification<Product> specification = ProductSpecification.productFilterSearch(request);
         Page<Product> productPage = productRepository.findAll(specification, pageable);
@@ -161,13 +161,17 @@ public class ProductServiceImpl implements ProductService {
 
         List<ProductResponse> productResponseList =
                 productList.stream()
-                                .map(product -> {
-                                    ProductResponse productResponse = new ModelMapper().map(product, ProductResponse.class);
-                                    return
-                                })
+                        .map(product -> {
+                            ProductResponse productResponse = new ModelMapper().map(product, ProductResponse.class);
+                            return productResponse;
+                        }).toList();
+        DataPaginationResponse dataPaginationResponse = DataPaginationResponse.builder()
+                .totalElementCount(productPage.getTotalElements())
+                .result(productResponseList)
+                .build();
 
 
-        ResponseBuilder.buildSuccessResponse(productList);
+        return ResponseBuilder.buildSuccessResponse(dataPaginationResponse);
 
     }
 

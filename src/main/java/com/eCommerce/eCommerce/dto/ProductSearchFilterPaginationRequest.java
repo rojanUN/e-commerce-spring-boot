@@ -4,6 +4,9 @@ package com.eCommerce.eCommerce.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 public class ProductSearchFilterPaginationRequest extends PaginationRequest {
@@ -14,8 +17,10 @@ public class ProductSearchFilterPaginationRequest extends PaginationRequest {
 
     private String createdDateTo;
 
-    private String stockFloor;
+    private BigDecimal priceFloor;
 
-    private String stockCeiling;
+    private BigDecimal priceCeiling;
+
+    private List<Long> categoryIds;
 
 }

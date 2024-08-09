@@ -3,9 +3,11 @@ package com.eCommerce.eCommerce.controller;
 import com.eCommerce.eCommerce.dto.PaymentMethodRequest;
 import com.eCommerce.eCommerce.entity.User;
 import com.eCommerce.eCommerce.model.ApiResponse;
+import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.PaymentMethodService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,8 @@ public class PaymentMethodController {
     private final PaymentMethodService paymentMethodService;
 
     @PostMapping("/add")
-    public ApiResponse addPaymentMethod(@Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
-        return paymentMethodService.addPaymentMethod(user.getId(), paymentMethodRequest);
+    public ResponseEntity<Response> addPaymentMethod(@Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(paymentMethodService.addPaymentMethod(user.getId(), paymentMethodRequest));
     }
 
     @GetMapping("/")
