@@ -2,14 +2,10 @@ package com.eCommerce.eCommerce.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Data
-@Getter
-@Setter
 public class ProductRequest {
 
     @NotBlank(message = "Name cannot be blank")
