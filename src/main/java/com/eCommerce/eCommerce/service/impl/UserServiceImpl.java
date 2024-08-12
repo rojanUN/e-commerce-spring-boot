@@ -18,6 +18,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +69,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        user.setLastPasswordChange(LocalDateTime.now());
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
