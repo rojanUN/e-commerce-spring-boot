@@ -1,6 +1,7 @@
 package com.eCommerce.eCommerce.service.impl;
 
 import com.eCommerce.eCommerce.builder.ResponseBuilder;
+import com.eCommerce.eCommerce.dto.ChangePasswordRequest;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
 import com.eCommerce.eCommerce.dto.response.UserResponse;
 import com.eCommerce.eCommerce.entity.Role;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     private final PasswordEncoder passwordEncoder;
+
     private final ModelMapper modelMapper;
 
     @Override
@@ -54,6 +56,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public ApiResponse changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new EcommerceException("USR002");
+        }
+
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+            throw new EcommerceException("USR003");
+        }
+
+        String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        return ResponseBuilder.buildSuccessResponse("message.user.change.password.success");
+    }
+
+    @Override
     public ApiResponse createAdministrator(RegisterUserDto input) {
         log.info("Creating administrator with email: {}", input.getEmail());
 
@@ -75,4 +96,6 @@ public class UserServiceImpl implements UserService {
         log.info("Created administrator with ID: {}", savedUser.getId());
         return ResponseBuilder.buildSuccessResponse(userResponse);
     }
+
+
 }
