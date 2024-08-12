@@ -17,4 +17,6 @@ public interface ProductService {
     ApiResponse updateProduct(Long id, ProductRequest productRequest);
 
     ApiResponse productList(ProductSearchFilterPaginationRequest request);
+
+    void sendNotification(long id);
 }

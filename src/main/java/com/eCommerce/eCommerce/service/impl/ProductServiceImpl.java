@@ -10,6 +10,7 @@ import com.eCommerce.eCommerce.entity.Product;
 import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.*;
+import com.eCommerce.eCommerce.service.NotificationService;
 import com.eCommerce.eCommerce.service.ProductService;
 import com.eCommerce.eCommerce.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
@@ -38,6 +39,7 @@ public class ProductServiceImpl implements ProductService {
     private final WishListItemRepository wishListItemRepository;
     private final ReviewRepository reviewRepository;
     private final OrderItemRepository orderItemRepository;
+    private final NotificationService notificationService;
 
     @Override
     public ApiResponse createProduct(ProductRequest productRequest) {
@@ -51,6 +53,16 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = new Product();
         return getApiResponse(productRequest, category, product);
+    }
+
+    @Override
+    public void sendNotification(long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> {
+            log.error("Product with ID: {} not found", id);
+            return new EcommerceException("PRO001");
+        });
+
+        notificationService.notifyAdminLowStock(product);
     }
 
     //Helper method
@@ -95,7 +107,9 @@ public class ProductServiceImpl implements ProductService {
             return new EcommerceException("PRO001");
         });
 
+        Double avergaeRating = reviewRepository.calculateAverageRatingByProductId(id);
         ProductResponse productResponse = modelMapper.map(product, ProductResponse.class);
+        productResponse.setAverageRating(avergaeRating);
         return ResponseBuilder.buildSuccessResponse(productResponse);
     }
 

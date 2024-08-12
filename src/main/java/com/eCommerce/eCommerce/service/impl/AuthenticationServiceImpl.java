@@ -62,7 +62,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ApiResponse authenticate(LoginUserDto input) {
+    public User authenticate(LoginUserDto input) {
         log.info("Authenticating user with email: {}", input.getEmail());
 
         try {
@@ -85,6 +85,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         UserResponse userResponse = modelMapper.map(user, UserResponse.class);
         log.info("User authenticated successfully with email: {}", input.getEmail());
-        return ResponseBuilder.buildSuccessResponse(userResponse);
+        return user;
     }
 }
