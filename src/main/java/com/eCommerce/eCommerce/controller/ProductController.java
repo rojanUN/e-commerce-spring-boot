@@ -50,4 +50,10 @@ public class ProductController {
         return ResponseEntity.ok(productService.productList(request));
     }
 
+    @PostMapping("/send-notification/{id}")
+    public String sendNotification(@PathVariable Long id) {
+        productService.sendNotification(id);
+        return "Big Success";
+    }
+
 }

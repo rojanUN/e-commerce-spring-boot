@@ -4,7 +4,6 @@ import com.eCommerce.eCommerce.dto.LoginUserDto;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
 import com.eCommerce.eCommerce.dto.response.LoginResponse;
 import com.eCommerce.eCommerce.entity.User;
-import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.model.Response;
 import com.eCommerce.eCommerce.service.AuthenticationService;
 import com.eCommerce.eCommerce.service.impl.JwtService;
@@ -32,14 +31,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-        ApiResponse authenticatedUser = authenticationService.authenticate(loginUserDto);
+        User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
-        User user = (User) authenticatedUser.getData();
-        String jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateToken(authenticatedUser);
 
         LoginResponse loginResponse = new LoginResponse().setToken(jwtToken).setExpiresIn(jwtService.getExpirationTime());
 
         return ResponseEntity.ok(loginResponse);
     }
+
 }
 

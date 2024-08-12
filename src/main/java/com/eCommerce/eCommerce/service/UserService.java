@@ -1,5 +1,6 @@
 package com.eCommerce.eCommerce.service;
 
+import com.eCommerce.eCommerce.dto.ChangePasswordRequest;
 import com.eCommerce.eCommerce.dto.RegisterUserDto;
 import com.eCommerce.eCommerce.model.ApiResponse;
 
@@ -9,6 +10,8 @@ public interface UserService {
 
     ApiResponse createAdministrator(RegisterUserDto input);
 
-    public ApiResponse getAuthenticatedUser(Long userId);
+    ApiResponse getAuthenticatedUser(Long userId);
+
+    ApiResponse changePassword(Long userId, ChangePasswordRequest changePasswordRequest);
 
 }

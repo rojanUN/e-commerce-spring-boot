@@ -1,5 +1,6 @@
 package com.eCommerce.eCommerce.service.impl;
 
+import com.eCommerce.eCommerce.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,10 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
+    }
+
+    private Date extractIssuedAt(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -61,6 +67,15 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
+        final Date issuedAt = extractIssuedAt(token);
+
+        if (userDetails instanceof User user) {
+            LocalDateTime lastPasswordChange = user.getLastPasswordChange();
+            if (lastPasswordChange != null && issuedAt.before(java.sql.Timestamp.valueOf(lastPasswordChange))) {
+                return false;
+            }
+        }
+
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
