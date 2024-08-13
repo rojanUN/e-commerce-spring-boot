@@ -20,7 +20,7 @@ public class PaymentMethodController {
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/add")
-    public ResponseEntity<Response> addPaymentMethod(@Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Response> addPaymentMethod(@Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) throws Exception {
         return ResponseEntity.ok(paymentMethodService.addPaymentMethod(user.getId(), paymentMethodRequest));
     }
 
@@ -38,7 +38,7 @@ public class PaymentMethodController {
 
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updatePaymentMethod(@PathVariable Long id, @Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Response> updatePaymentMethod(@PathVariable Long id, @Valid @RequestBody PaymentMethodRequest paymentMethodRequest, @AuthenticationPrincipal User user) throws Exception {
         return ResponseEntity.ok(paymentMethodService.updatePaymentMethod(user.getId(), id, paymentMethodRequest));
     }
 
