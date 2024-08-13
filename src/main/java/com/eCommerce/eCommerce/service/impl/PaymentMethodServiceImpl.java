@@ -10,16 +10,18 @@ import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.PaymentMethodRepository;
 import com.eCommerce.eCommerce.repository.UserRepository;
 import com.eCommerce.eCommerce.service.PaymentMethodService;
+import com.eCommerce.eCommerce.util.AESEncryptionUtil;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class PaymentMethodServiceImpl implements PaymentMethodService {
 
@@ -29,9 +31,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     private final ModelMapper modelMapper;
 
+    @Value("${aes.secret-key}")
+    private String secretKey;
+
     @Override
     @Transactional
-    public ApiResponse addPaymentMethod(Long userId, PaymentMethodRequest paymentMethodRequest) {
+    public ApiResponse addPaymentMethod(Long userId, PaymentMethodRequest paymentMethodRequest) throws Exception {
         log.info("Adding payment method for user ID: {}", userId);
 
         User user = userRepository.findById(userId)
@@ -51,6 +56,15 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         PaymentMethod paymentMethod = new PaymentMethod();
         modelMapper.map(paymentMethodRequest, paymentMethod);
         paymentMethod.setUser(user);
+
+        try {
+            String encryptedAccountNumber = AESEncryptionUtil.encrypt(paymentMethodRequest.getAccountNumber(), secretKey);
+            paymentMethod.setAccountNumber(encryptedAccountNumber);
+        } catch (Exception e) {
+            log.error("Failed to encrypt account number for user ID: {}", userId, e);
+            throw new EcommerceException("ENC001");
+        }
+
         paymentMethodRepository.save(paymentMethod);
 
         log.info("Payment method created successfully for user ID: {}", userId);
@@ -79,7 +93,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     @Transactional
-    public ApiResponse updatePaymentMethod(Long userId, Long paymentMethodId, PaymentMethodRequest paymentMethodRequest) {
+    public ApiResponse updatePaymentMethod(Long userId, Long paymentMethodId, PaymentMethodRequest paymentMethodRequest) throws Exception {
         log.info("Updating payment method ID: {} for user ID: {}", paymentMethodId, userId);
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
@@ -102,6 +116,13 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         }
 
         modelMapper.map(paymentMethodRequest, paymentMethod);
+        try {
+            String encryptedAccountNumber = AESEncryptionUtil.encrypt(paymentMethodRequest.getAccountNumber(), secretKey);
+            paymentMethod.setAccountNumber(encryptedAccountNumber);
+        } catch (Exception e) {
+            log.error("Failed to encrypt account number for user ID: {}", userId, e);
+            throw new EcommerceException("Encryption failed", e);
+        }
         paymentMethodRepository.save(paymentMethod);
 
         PaymentMethodResponse paymentMethodResponse = modelMapper.map(paymentMethod, PaymentMethodResponse.class);
@@ -120,7 +141,17 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         }
 
         List<PaymentMethodResponse> paymentMethodResponses = paymentMethods.stream()
-                .map(paymentMethod -> modelMapper.map(paymentMethod, PaymentMethodResponse.class))
+                .map(paymentMethod -> {
+                    PaymentMethodResponse response = modelMapper.map(paymentMethod, PaymentMethodResponse.class);
+                    try {
+                        String decryptedAccountNumber = AESEncryptionUtil.decrypt(paymentMethod.getAccountNumber(), secretKey);
+                        response.setAccountNumber(decryptedAccountNumber);
+                    } catch (Exception e) {
+                        log.error("Failed to decrypt account number for payment method ID: {}", paymentMethod.getId(), e);
+                        throw new EcommerceException("Failed to decrypt account number", e);
+                    }
+                    return response;
+                })
                 .toList();
 
         log.info("Found {} payment methods for user ID: {}", paymentMethodResponses.size(), userId);

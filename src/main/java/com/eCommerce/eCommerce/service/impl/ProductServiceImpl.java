@@ -33,12 +33,19 @@ import java.util.Objects;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+
     private final ModelMapper modelMapper;
+
     private final CategoryRepository categoryRepository;
+
     private final UserRepository userRepository;
+
     private final WishListItemRepository wishListItemRepository;
+
     private final ReviewRepository reviewRepository;
+
     private final OrderItemRepository orderItemRepository;
+
     private final NotificationService notificationService;
 
     @Override

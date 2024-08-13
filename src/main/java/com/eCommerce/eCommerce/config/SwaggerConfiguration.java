@@ -20,9 +20,9 @@ public class SwaggerConfiguration {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Ecommerce API")
+                        .title("Ecommerce APIs")
                         .version("1.0")
-                        .description("API for Ecommerce Application"))
+                        .description("APIs for Ecommerce Application"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 
