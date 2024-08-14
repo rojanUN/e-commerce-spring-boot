@@ -15,12 +15,14 @@ import com.eCommerce.eCommerce.service.AuthenticationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 @AllArgsConstructor
@@ -37,10 +39,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final ModelMapper modelMapper;
 
+
     @Override
     public ApiResponse signup(RegisterUserDto input) {
         log.info("Signing up user with email: {}", input.getEmail());
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(emailRegex);
 
+        if (!pattern.matcher(input.getEmail()).matches()) {
+            log.error("Invalid email format: {}", input.getEmail());
+            return ResponseBuilder.buildResponse("Invalid Email format", HttpStatus.BAD_REQUEST);
+
+        }
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.USER);
 
         if (optionalRole.isEmpty()) {

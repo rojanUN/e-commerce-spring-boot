@@ -1,4 +1,4 @@
-package com.eCommerce.eCommerce.specification;
+package com.eCommerce.eCommerce.service.specification;
 
 import com.eCommerce.eCommerce.dto.ProductSearchFilterPaginationRequest;
 import com.eCommerce.eCommerce.entity.Product;
