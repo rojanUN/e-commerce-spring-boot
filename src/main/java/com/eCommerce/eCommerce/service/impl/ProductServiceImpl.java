@@ -12,7 +12,7 @@ import com.eCommerce.eCommerce.model.ApiResponse;
 import com.eCommerce.eCommerce.repository.*;
 import com.eCommerce.eCommerce.service.NotificationService;
 import com.eCommerce.eCommerce.service.ProductService;
-import com.eCommerce.eCommerce.specification.ProductSpecification;
+import com.eCommerce.eCommerce.service.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
