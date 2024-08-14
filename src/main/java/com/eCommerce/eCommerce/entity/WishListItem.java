@@ -7,7 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "wishListItems")
+@Table(name = "wishListItem")
 public class WishListItem {
 
     @Id
