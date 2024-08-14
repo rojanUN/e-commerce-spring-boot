@@ -21,7 +21,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response> authenticatedUser(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(userService.getAuthenticatedUser(currentUser.getId()));
     }
