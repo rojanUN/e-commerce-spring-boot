@@ -1,56 +1,37 @@
 package com.eCommerce.eCommerce.exceptions;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AccountStatusException;
+import com.eCommerce.eCommerce.builder.ResponseBuilder;
+import com.eCommerce.eCommerce.model.Response;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleSecurityException(Exception exception) {
-        ProblemDetail errorDetail = null;
 
-        // TODO stack trace lie observability tool ma pathaunay eg: logging, metrics, traces
-        exception.printStackTrace();
-
-        if (exception instanceof BadCredentialsException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
-            errorDetail.setProperty("description", "The username or password is incorrect");
-
-            return errorDetail;
-        }
-
-        if (exception instanceof AccountStatusException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The account is locked");
-        }
-
-        if (exception instanceof AccessDeniedException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "You are not authorized to access this resource");
-        }
-
-        if (exception instanceof SignatureException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The JWT signature is invalid");
-        }
-
-        if (exception instanceof ExpiredJwtException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The JWT token has expired");
-        }
-
-        if (errorDetail == null) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
-            errorDetail.setProperty("description", "Unknown internal server error.");
-        }
-
-        return errorDetail;
+    @ExceptionHandler(EcommerceException.class)
+    public ResponseEntity<Response> handleEcommerceException(EcommerceException e) {
+        return ResponseEntity.status(e.getHttpStatus())
+                .body(ResponseBuilder.buildFailResponse(e));
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Response> handleBadCredentialsException(BadCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ResponseBuilder.buildFailResponse(e));
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<Response> handleDuplicateKeyException(DuplicateKeyException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ResponseBuilder.buildResponse("Duplicate key error" + e.getMessage(), HttpStatus.CONFLICT));
+    }
+
+
 }

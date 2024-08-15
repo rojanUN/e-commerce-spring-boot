@@ -4,6 +4,7 @@ import com.eCommerce.eCommerce.exceptions.EcommerceException;
 import com.eCommerce.eCommerce.model.ApiError;
 import com.eCommerce.eCommerce.model.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public class ResponseBuilder {
 
@@ -35,7 +36,17 @@ public class ResponseBuilder {
         return response;
 
     }
-//
+
+    public static ApiError buildFailResponse(BadCredentialsException exception) {
+        ApiError response = new ApiError();
+        response.setSuccess(Boolean.FALSE);
+        response.setCode(String.valueOf(HttpStatus.UNAUTHORIZED.value()));
+        response.setMessage(exception.getMessage() + ", Username or Password incorrect.");
+        return response;
+
+    }
+
+    //
 //    public static ApiError buildUnknownFailResponse(Exception exception) {
 //        ApiError response = new ApiError();
 //        response.setSuccess(Boolean.FALSE);

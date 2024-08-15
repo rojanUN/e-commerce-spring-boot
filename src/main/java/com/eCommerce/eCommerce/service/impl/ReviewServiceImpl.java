@@ -17,6 +17,7 @@ import com.eCommerce.eCommerce.service.ReviewService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,25 +45,25 @@ public class ReviewServiceImpl implements ReviewService {
                 .findById(reviewRequest.getProductId())
                 .orElseThrow(() -> {
                     log.error("Product with ID: {} not found", reviewRequest.getProductId());
-                    return new EcommerceException("PRO001");
+                    return new EcommerceException("PRO001", HttpStatus.NOT_FOUND);
                 });
 
         List<Order> completedOrders = orderRepository.findByUserIdAndProductIdAndStatus(userId, reviewRequest.getProductId(), OrderStatus.COMPLETED);
         if (completedOrders.isEmpty()) {
             log.error("No completed orders found for user ID: {} and product ID: {}", userId, reviewRequest.getProductId());
-            throw new EcommerceException("ODR005");
+            throw new EcommerceException("ODR005", HttpStatus.FORBIDDEN);
         }
 
         boolean reviewExists = reviewRepository.existsByUserIdAndProductId(userId, reviewRequest.getProductId());
         if (reviewExists) {
             log.error("Review already exists for user ID: {} and product ID: {}", userId, reviewRequest.getProductId());
-            throw new EcommerceException("REV003");
+            throw new EcommerceException("REV003", HttpStatus.FORBIDDEN);
         }
 
         Review review = new Review();
         review.setUser(userRepository.findById(userId).orElseThrow(() -> {
             log.error("User with ID: {} not found", userId);
-            return new EcommerceException("USR001");
+            return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
         }));
         review.setProduct(product);
         review.setComment(reviewRequest.getComment());
@@ -80,12 +81,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.error("Review with ID: {} not found", reviewId);
-            return new EcommerceException("REV001");
+            return new EcommerceException("REV001", HttpStatus.NOT_FOUND);
         });
 
         if (!review.getUser().getId().equals(userId)) {
             log.error("User ID: {} does not match review owner ID: {}", userId, review.getUser().getId());
-            throw new EcommerceException("REV002");
+            throw new EcommerceException("REV002", HttpStatus.FORBIDDEN);
         }
 
         reviewRepository.delete(review);
@@ -100,12 +101,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> {
             log.error("Review with ID: {} not found", reviewId);
-            return new EcommerceException("REV001");
+            return new EcommerceException("REV001", HttpStatus.NOT_FOUND);
         });
 
         if (!review.getUser().getId().equals(userId)) {
             log.error("User ID: {} does not match review owner ID: {}", userId, review.getUser().getId());
-            throw new EcommerceException("REV002");
+            throw new EcommerceException("REV002", HttpStatus.FORBIDDEN);
         }
 
         review.setComment(reviewRequest.getComment());
