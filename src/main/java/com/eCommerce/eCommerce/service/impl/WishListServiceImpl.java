@@ -15,6 +15,7 @@ import com.eCommerce.eCommerce.service.WishListService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class WishListServiceImpl implements WishListService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> {
                         log.error("User with ID {} not found", userId);
-                        return new EcommerceException("USR001");
+                        return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                     });
             wishList = new WishList();
             wishList.setUser(user);
@@ -55,7 +56,7 @@ public class WishListServiceImpl implements WishListService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> {
                     log.error("Product with ID {} not found", productId);
-                    return new EcommerceException("PRO001");
+                    return new EcommerceException("PRO001", HttpStatus.NOT_FOUND);
                 });
 
         WishListItem wishListItem = new WishListItem();
@@ -106,7 +107,7 @@ public class WishListServiceImpl implements WishListService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> {
                         log.error("User with ID {} not found", userId);
-                        return new RuntimeException("User not found");
+                        return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                     });
             wishList = new WishList();
             wishList.setUser(user);

@@ -12,6 +12,7 @@ import com.eCommerce.eCommerce.service.CategoryService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +32,9 @@ public class CategoryServiceImpl implements CategoryService {
     public ApiResponse createCategory(CategoryRequest categoryRequest) {
         log.info("Creating category with name: {}", categoryRequest.getName());
 
+        if (categoryRepository.existsByName(categoryRequest.getName().toLowerCase())) {
+            throw new EcommerceException("CAT003", HttpStatus.CONFLICT);
+        }
         Category category = new Category();
         modelMapper.map(categoryRequest, category);
         categoryRepository.save(category);
@@ -61,7 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (!categoryRepository.existsById(id)) {
             log.error("Category with ID: {} not found", id);
-            throw new EcommerceException("CAT001");
+            throw new EcommerceException("CAT001", HttpStatus.NOT_FOUND);
         }
 
         try {
@@ -81,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = categoryRepository.findById(id).orElseThrow(() -> {
             log.error("Category with ID: {} not found", id);
-            return new EcommerceException("CAT001");
+            return new EcommerceException("CAT001", HttpStatus.NOT_FOUND);
         });
 
         modelMapper.map(categoryRequest, category);

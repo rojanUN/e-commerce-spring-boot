@@ -15,6 +15,7 @@ import com.eCommerce.eCommerce.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,11 +63,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
 
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
-            throw new EcommerceException("USR002");
+            throw new EcommerceException("USR002", HttpStatus.CONFLICT);
         }
 
         if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
-            throw new EcommerceException("USR003");
+            throw new EcommerceException("USR003", HttpStatus.BAD_REQUEST);
         }
 
         String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
@@ -85,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         if (optionalRole.isEmpty()) {
             log.warn("Admin role not found");
-            return null;
+            throw new EcommerceException("ROL001", HttpStatus.NOT_FOUND);
         }
 
         var user = new User()

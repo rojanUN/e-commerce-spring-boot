@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User with ID: {} not found", userId);
-                    return new EcommerceException("USR001");
+                    return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                 });
 
         if (paymentMethodRequest.getIsDefault()) {
@@ -62,7 +63,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             paymentMethod.setAccountNumber(encryptedAccountNumber);
         } catch (Exception e) {
             log.error("Failed to encrypt account number for user ID: {}", userId, e);
-            throw new EcommerceException("ENC001");
+            throw new EcommerceException("ENC001", HttpStatus.FAILED_DEPENDENCY);
         }
 
         paymentMethodRepository.save(paymentMethod);
@@ -78,12 +79,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
                 .orElseThrow(() -> {
                     log.error("Payment method with ID: {} not found", paymentMethodId);
-                    return new EcommerceException("PMT001");
+                    return new EcommerceException("PMT001", HttpStatus.NOT_FOUND);
                 });
 
         if (!paymentMethod.getUser().getId().equals(userId)) {
             log.error("Payment method ID: {} does not belong to user ID: {}", paymentMethodId, userId);
-            throw new EcommerceException("PMT002");
+            throw new EcommerceException("PMT002", HttpStatus.FORBIDDEN);
         }
 
         paymentMethodRepository.delete(paymentMethod);
@@ -99,12 +100,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentMethodId)
                 .orElseThrow(() -> {
                     log.error("Payment method with ID: {} not found", paymentMethodId);
-                    return new EcommerceException("PMT001");
+                    return new EcommerceException("PMT001", HttpStatus.NOT_FOUND);
                 });
 
         if (!paymentMethod.getUser().getId().equals(userId)) {
             log.error("Payment method ID: {} does not belong to user ID: {}", paymentMethodId, userId);
-            throw new EcommerceException("PMT001");
+            throw new EcommerceException("PMT001", HttpStatus.FORBIDDEN);
         }
 
         if (paymentMethodRequest.getIsDefault()) {

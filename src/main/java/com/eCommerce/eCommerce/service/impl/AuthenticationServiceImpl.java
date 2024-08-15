@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public User authenticate(LoginUserDto input) {
         log.info("Authenticating user with email: {}", input.getEmail());
 
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", input.getEmail());
+                    return new EcommerceException("USR001");
+                });
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -82,18 +88,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             input.getPassword()
                     )
             );
-        } catch (Exception e) {
+        } catch (BadCredentialsException e) {
             log.error("Authentication failed for email: {}", input.getEmail(), e);
             throw e;
         }
 
-        User user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> {
-                    log.error("User not found with email: {}", input.getEmail());
-                    return new RuntimeException("User not found");
-                });
-
-        UserResponse userResponse = modelMapper.map(user, UserResponse.class);
         log.info("User authenticated successfully with email: {}", input.getEmail());
         return user;
     }

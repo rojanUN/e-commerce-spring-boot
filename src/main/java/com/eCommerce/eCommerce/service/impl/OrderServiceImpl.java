@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -48,41 +49,41 @@ public class OrderServiceImpl implements OrderService {
 
         if (CollectionUtils.isEmpty(orderRequest.getOrderItems())) {
             log.error("Order creation failed: Order items are empty");
-            throw new EcommerceException("ODR001");
+            throw new EcommerceException("ODR001", HttpStatus.CONFLICT);
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User with ID: {} not found", userId);
-                    return new EcommerceException("USR001");
+                    return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                 });
 
         Address address = (orderRequest.getShippingAddressId() == null) ?
                 addressRepository.findByUserIdAndIsDefaultTrue(userId)
                         .orElseThrow(() -> {
                             log.error("Default shipping address for user ID: {} not found", userId);
-                            return new EcommerceException("ADR003");
+                            return new EcommerceException("ADR003", HttpStatus.NOT_FOUND);
                         }) :
                 addressRepository.findById(orderRequest.getShippingAddressId())
                         .orElseThrow(() -> {
                             log.error("Shipping address with ID: {} not found", orderRequest.getShippingAddressId());
-                            return new EcommerceException("ADR001");
+                            return new EcommerceException("ADR001", HttpStatus.NOT_FOUND);
                         });
 
         if (!address.getUser().getId().equals(userId)) {
             log.error("Address ID: {} does not belong to user ID: {}", orderRequest.getShippingAddressId(), userId);
-            throw new EcommerceException("ADR002");
+            throw new EcommerceException("ADR002", HttpStatus.CONFLICT);
         }
 
         PaymentMethod paymentMethod = paymentMethodRepository.findById(orderRequest.getPaymentMethodId())
                 .orElseThrow(() -> {
                     log.error("Payment method with ID: {} not found", orderRequest.getPaymentMethodId());
-                    return new EcommerceException("PMT001");
+                    return new EcommerceException("PMT001", HttpStatus.NOT_FOUND);
                 });
 
         if (!paymentMethod.getUser().getId().equals(userId)) {
             log.error("Payment method ID: {} does not belong to user ID: {}", orderRequest.getPaymentMethodId(), userId);
-            throw new EcommerceException("PMT001");
+            throw new EcommerceException("PMT001", HttpStatus.FORBIDDEN);
         }
 
         Order order = new Order();
@@ -98,13 +99,13 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(itemRequest.getProductId())
                     .orElseThrow(() -> {
                         log.error("Product with ID: {} not found", itemRequest.getProductId());
-                        return new EcommerceException("PRD001");
+                        return new EcommerceException("PRD001", HttpStatus.NOT_FOUND);
                     });
 
             if (itemRequest.getQuantity() > product.getStock()) {
                 log.error("Insufficient stock for product ID: {}. Requested: {}, Available: {}",
                         itemRequest.getProductId(), itemRequest.getQuantity(), product.getStock());
-                throw new EcommerceException("PRO003");
+                throw new EcommerceException("PRO003", HttpStatus.CONFLICT);
             }
 
             OrderItem orderItem = new OrderItem();
@@ -139,7 +140,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("User with ID: {} not found", userId);
-                    return new EcommerceException("USR001");
+                    return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                 });
 
         List<Order> orders = orderRepository.findOrdersByUserId(user.getId());
@@ -159,17 +160,17 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> {
                     log.error("Order with ID: {} not found", orderId);
-                    return new EcommerceException("ODR001");
+                    return new EcommerceException("ODR001", HttpStatus.NOT_FOUND);
                 });
 
         if (!order.getUser().getId().equals(userId)) {
             log.error("User ID: {} does not match the owner of order ID: {}", userId, orderId);
-            throw new EcommerceException("ODR003");
+            throw new EcommerceException("ODR003", HttpStatus.FORBIDDEN);
         }
 
         if (!order.getStatus().equals(OrderStatus.PENDING)) {
             log.error("Order ID: {} is already SHIPPED", orderId);
-            throw new EcommerceException("ODR004");
+            throw new EcommerceException("ODR004", HttpStatus.CONFLICT);
         }
 
         order.setStatus(OrderStatus.CANCELLED);
@@ -192,12 +193,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> {
                     log.error("Order with ID: {} not found", orderId);
-                    return new EcommerceException("ODR001");
+                    return new EcommerceException("ODR001", HttpStatus.NOT_FOUND);
                 });
 
         if (!order.getStatus().equals(OrderStatus.PENDING)) {
             log.error("Order ID: {} is not in PENDING status", orderId);
-            throw new EcommerceException("ODR006");
+            throw new EcommerceException("ODR006", HttpStatus.CONFLICT);
         }
 
         order.setStatus(OrderStatus.COMPLETED);
