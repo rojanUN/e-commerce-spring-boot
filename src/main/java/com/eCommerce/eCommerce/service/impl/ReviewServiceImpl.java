@@ -17,6 +17,8 @@ import com.eCommerce.eCommerce.service.ReviewService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +36,9 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
 
     private final UserRepository userRepository;
-    
+
     private final ModelMapper modelMapper;
+    private final MessageSource messageSource;
 
     @Override
     public ApiResponse submitReview(Long userId, ReviewRequest reviewRequest) {
@@ -72,7 +75,7 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRepository.save(review);
         log.info("Review submitted successfully for product ID: {} by user ID: {}", reviewRequest.getProductId(), userId);
 
-        return ResponseBuilder.buildSuccessResponse("message.review.submit.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.review.submit.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -92,7 +95,7 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRepository.delete(review);
         log.info("Review with ID: {} removed successfully by user ID: {}", reviewId, userId);
 
-        return ResponseBuilder.buildSuccessResponse("message.review.delete.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.review.delete.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -116,7 +119,7 @@ public class ReviewServiceImpl implements ReviewService {
         ReviewResponse reviewResponse = modelMapper.map(review, ReviewResponse.class);
         log.info("Review with ID: {} updated successfully by user ID: {}", reviewId, userId);
 
-        return ResponseBuilder.buildSuccessResponse(reviewResponse, "message.review.update.success");
+        return ResponseBuilder.buildSuccessResponse(reviewResponse, messageSource.getMessage("message.review.update.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -132,6 +135,6 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(review -> modelMapper.map(review, ReviewResponse.class))
                 .toList();
 
-        return ResponseBuilder.buildSuccessResponse(reviewResponses, "message.review.fetch.success");
+        return ResponseBuilder.buildSuccessResponse(reviewResponses, messageSource.getMessage("message.review.fetch.success", null, LocaleContextHolder.getLocale()));
     }
 }

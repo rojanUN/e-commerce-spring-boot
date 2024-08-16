@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(productRequest.getCategoryId())
                 .orElseThrow(() -> {
                     log.error("Category with ID: {} not found", productRequest.getCategoryId());
-                    return new EcommerceException("CAT001");
+                    return new EcommerceException("CAT001", HttpStatus.NOT_FOUND);
                 });
 
         Product product = new Product();
@@ -66,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
     public void sendNotification(long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> {
             log.error("Product with ID: {} not found", id);
-            return new EcommerceException("PRO001");
+            return new EcommerceException("PRO001", HttpStatus.NOT_FOUND);
         });
 
         notificationService.notifyAdminLowStock(product);
@@ -111,12 +112,12 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.findById(id).orElseThrow(() -> {
             log.error("Product with ID: {} not found", id);
-            return new EcommerceException("PRO001");
+            return new EcommerceException("PRO001", HttpStatus.NOT_FOUND);
         });
 
-        Double avergaeRating = reviewRepository.calculateAverageRatingByProductId(id);
+        Double averageRating = reviewRepository.calculateAverageRatingByProductId(id);
         ProductResponse productResponse = modelMapper.map(product, ProductResponse.class);
-        productResponse.setAverageRating(avergaeRating);
+        productResponse.setAverageRating(averageRating);
         return ResponseBuilder.buildSuccessResponse(productResponse);
     }
 
@@ -127,7 +128,7 @@ public class ProductServiceImpl implements ProductService {
 
         if (!productRepository.existsById(id)) {
             log.error("Product with ID: {} does not exist", id);
-            throw new EcommerceException("PRO001");
+            throw new EcommerceException("PRO001", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         try {
@@ -153,14 +154,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Product with ID: {} not found", id);
-                    return new EcommerceException("PRO001");
+                    return new EcommerceException("PRO001", HttpStatus.NOT_FOUND);
                 });
 
         Category category = productRequest.getCategoryId() != null ?
                 categoryRepository.findById(productRequest.getCategoryId())
                         .orElseThrow(() -> {
                             log.error("Category with ID: {} not found", productRequest.getCategoryId());
-                            return new EcommerceException("CAT001");
+                            return new EcommerceException("CAT001", HttpStatus.NOT_FOUND);
                         }) :
                 product.getCategory();
 

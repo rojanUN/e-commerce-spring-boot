@@ -12,6 +12,8 @@ import com.eCommerce.eCommerce.service.CategoryService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final ModelMapper modelMapper;
 
+    private final MessageSource messageSource;
+
     @Override
     public ApiResponse createCategory(CategoryRequest categoryRequest) {
         log.info("Creating category with name: {}", categoryRequest.getName());
@@ -43,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
         modelMapper.map(category, categoryResponse);
 
         log.info("Category created successfully with ID: {}", category.getId());
-        return ResponseBuilder.buildSuccessResponse(categoryResponse, "message.category.created.success");
+        return ResponseBuilder.buildSuccessResponse(categoryResponse, messageSource.getMessage("message.category.created.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -72,10 +76,10 @@ public class CategoryServiceImpl implements CategoryService {
             productRepository.deleteByCategoryId(id);
             categoryRepository.deleteById(id);
             log.info("Category with ID: {} deleted successfully", id);
-            return ResponseBuilder.buildSuccessResponse("message.category.deleted.success");
+            return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.category.deleted.success", null, LocaleContextHolder.getLocale()));
         } catch (Exception e) {
             log.error("Error deleting category with ID: {}", id, e);
-            throw new EcommerceException("CAT002");
+            throw new EcommerceException("CAT002", HttpStatus.BAD_REQUEST);
         }
     }
 

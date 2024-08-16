@@ -15,6 +15,8 @@ import com.eCommerce.eCommerce.service.WishListService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +26,13 @@ import org.springframework.stereotype.Service;
 public class WishListServiceImpl implements WishListService {
 
     private final WishListRepository wishListRepository;
+
     private final ModelMapper modelMapper;
+
     private final UserRepository userRepository;
+
     private final ProductRepository productRepository;
+    private final MessageSource messageSource;
 
     @Override
     public ApiResponse getWishListByUserId(Long userId) {
@@ -83,7 +89,7 @@ public class WishListServiceImpl implements WishListService {
             log.warn("Product ID: {} not found in wishlist for user ID: {}", productId, userId);
         }
         wishListRepository.save(wishList);
-        return ResponseBuilder.buildSuccessResponse("message.wish.list.deleted.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.wish.list.deleted.success", null, LocaleContextHolder.getLocale()));
     }
 
     // Helper methods

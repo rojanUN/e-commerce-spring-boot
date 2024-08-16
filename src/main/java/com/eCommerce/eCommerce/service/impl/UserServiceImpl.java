@@ -15,6 +15,8 @@ import com.eCommerce.eCommerce.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final ModelMapper modelMapper;
+    private final MessageSource messageSource;
 
     @Override
     public ApiResponse allUsers() {
@@ -60,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ApiResponse changePassword(Long userId, ChangePasswordRequest changePasswordRequest) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EcommerceException("USR001", HttpStatus.NOT_FOUND));
 
         if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
             throw new EcommerceException("USR002", HttpStatus.CONFLICT);
@@ -75,7 +78,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encodedPassword);
         userRepository.save(user);
 
-        return ResponseBuilder.buildSuccessResponse("message.user.change.password.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.user.change.password.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
