@@ -56,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (optionalRole.isEmpty()) {
             log.error("Role USER not found in the database");
-            throw new EcommerceException("ROL001");
+            throw new EcommerceException("ROL001", HttpStatus.NOT_FOUND);
         }
 
         User user = new User()
@@ -79,7 +79,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> {
                     log.error("User not found with email: {}", input.getEmail());
-                    return new EcommerceException("USR001");
+                    return new EcommerceException("USR001", HttpStatus.NOT_FOUND);
                 });
         try {
             authenticationManager.authenticate(

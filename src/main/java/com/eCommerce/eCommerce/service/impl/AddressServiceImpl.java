@@ -14,6 +14,9 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,13 +32,15 @@ public class AddressServiceImpl implements AddressService {
 
     private final ModelMapper modelMapper;
 
+    private final MessageSource messageSource;
+
     @Override
     @Transactional
     public ApiResponse addAddress(Long userId, AddressRequest addressRequest) {
         log.info("Adding address for user ID: {}", userId);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EcommerceException("USR001"));
+                .orElseThrow(() -> new EcommerceException("USR001", HttpStatus.NOT_FOUND));
 
         if (addressRequest.getIsDefault()) {
             log.info("Setting new default address for user ID: {}", userId);
@@ -45,6 +50,7 @@ public class AddressServiceImpl implements AddressService {
             });
         }
 
+
         Address address = new Address();
         modelMapper.map(addressRequest, address);
         address.setUser(user);
@@ -52,7 +58,7 @@ public class AddressServiceImpl implements AddressService {
         addressRepository.save(address);
 
         log.info("Address added for user ID: {}", userId);
-        return ResponseBuilder.buildSuccessResponse("message.address.created.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.address.created.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -60,16 +66,16 @@ public class AddressServiceImpl implements AddressService {
         log.info("Removing address ID: {} for user ID: {}", addressId, userId);
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new EcommerceException("ADR001"));
+                .orElseThrow(() -> new EcommerceException("ADR001", HttpStatus.NOT_FOUND));
 
         if (!address.getUser().getId().equals(userId)) {
             log.warn("User ID: {} does not match address owner ID: {}", userId, address.getUser().getId());
-            throw new EcommerceException("ADR002");
+            throw new EcommerceException("ADR002", HttpStatus.CONFLICT);
         }
 
         addressRepository.delete(address);
         log.info("Address ID: {} removed for user ID: {}", addressId, userId);
-        return ResponseBuilder.buildSuccessResponse("message.address.deleted.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.address.deleted.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -78,7 +84,7 @@ public class AddressServiceImpl implements AddressService {
         log.info("Updating address ID: {} for user ID: {}", addressId, userId);
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new EcommerceException("ADR001"));
+                .orElseThrow(() -> new EcommerceException("ADR001", HttpStatus.NOT_FOUND));
 
         if (!address.getUser().getId().equals(userId)) {
             log.warn("User ID: {} does not match address owner ID: {}", userId, address.getUser().getId());
@@ -98,7 +104,7 @@ public class AddressServiceImpl implements AddressService {
         AddressResponse addressResponse = modelMapper.map(address, AddressResponse.class);
 
         log.info("Address ID: {} updated for user ID: {}", addressId, userId);
-        return ResponseBuilder.buildSuccessResponse(addressResponse, "message.address.updated.success");
+        return ResponseBuilder.buildSuccessResponse(addressResponse, messageSource.getMessage("message.address.updated.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -108,7 +114,7 @@ public class AddressServiceImpl implements AddressService {
         List<Address> addresses = addressRepository.findByUserId(userId);
         if (addresses.isEmpty()) {
             log.info("No addresses found for user ID: {}", userId);
-            return ResponseBuilder.buildSuccessResponse("message.address.empty");
+            return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.address.empty", null, LocaleContextHolder.getLocale()));
         }
 
         List<AddressResponse> addressResponses = addresses.stream()

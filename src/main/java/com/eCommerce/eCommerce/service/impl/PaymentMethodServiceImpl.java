@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,8 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     private final PaymentMethodRepository paymentMethodRepository;
 
     private final ModelMapper modelMapper;
+
+    private final MessageSource messageSource;
 
     @Value("${aes.secret-key}")
     private String secretKey;
@@ -69,7 +73,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         paymentMethodRepository.save(paymentMethod);
 
         log.info("Payment method created successfully for user ID: {}", userId);
-        return ResponseBuilder.buildSuccessResponse("message.payment.method.created.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.payment.method.created.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -89,7 +93,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         paymentMethodRepository.delete(paymentMethod);
         log.info("Payment method ID: {} removed successfully for user ID: {}", paymentMethodId, userId);
-        return ResponseBuilder.buildSuccessResponse("message.payment.method.deleted.success");
+        return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.payment.method.deleted.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -128,7 +132,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         PaymentMethodResponse paymentMethodResponse = modelMapper.map(paymentMethod, PaymentMethodResponse.class);
         log.info("Payment method ID: {} updated successfully for user ID: {}", paymentMethodId, userId);
-        return ResponseBuilder.buildSuccessResponse(paymentMethodResponse, "message.payment.method.updated.success");
+        return ResponseBuilder.buildSuccessResponse(paymentMethodResponse, messageSource.getMessage("message.payment.method.updated.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -138,7 +142,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         List<PaymentMethod> paymentMethods = paymentMethodRepository.findByUserId(userId);
         if (paymentMethods.isEmpty()) {
             log.info("No payment methods found for user ID: {}", userId);
-            return ResponseBuilder.buildSuccessResponse("message.payment.method.empty");
+            return ResponseBuilder.buildSuccessResponse(messageSource.getMessage("message.payment.method.empty", null, LocaleContextHolder.getLocale()));
         }
 
         List<PaymentMethodResponse> paymentMethodResponses = paymentMethods.stream()

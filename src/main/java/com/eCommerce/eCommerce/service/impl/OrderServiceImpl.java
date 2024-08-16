@@ -14,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final ModelMapper modelMapper;
 
     private final OrderItemRepository orderItemRepository;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -129,7 +132,7 @@ public class OrderServiceImpl implements OrderService {
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
         log.info("Order created successfully with ID: {}", order.getId());
 
-        return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.created.success");
+        return ResponseBuilder.buildSuccessResponse(orderResponse, messageSource.getMessage("message.order.created.success", null, LocaleContextHolder.getLocale()));
     }
 
 
@@ -150,7 +153,7 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         log.info("Found {} orders for user ID: {}", orderResponses.size(), userId);
-        return ResponseBuilder.buildSuccessResponse(orderResponses, "message.order.fetch.success");
+        return ResponseBuilder.buildSuccessResponse(orderResponses, messageSource.getMessage("message.order.fetch.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -176,14 +179,14 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED);
         OrderItem orderItem = orderItemRepository.findOrderItemByOrderId(orderId);
         int quantity = orderItem.getQuantity();
-        Product product = productRepository.findById(orderItem.getProduct().getId()).orElseThrow(() -> new EcommerceException("PRO001"));
+        Product product = productRepository.findById(orderItem.getProduct().getId()).orElseThrow(() -> new EcommerceException("PRO001", HttpStatus.NOT_FOUND));
         product.setStock(product.getStock() + quantity);
         orderRepository.save(order);
 
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 
         log.info("Order ID: {} cancelled successfully", orderId);
-        return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.cancel.success");
+        return ResponseBuilder.buildSuccessResponse(orderResponse, messageSource.getMessage("message.order.cancel.success", null, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -206,6 +209,6 @@ public class OrderServiceImpl implements OrderService {
         OrderResponse orderResponse = modelMapper.map(order, OrderResponse.class);
 
         log.info("Order ID: {} completed successfully", orderId);
-        return ResponseBuilder.buildSuccessResponse(orderResponse, "message.order.complete.success");
+        return ResponseBuilder.buildSuccessResponse(orderResponse, messageSource.getMessage("message.order.complete.success", null, LocaleContextHolder.getLocale()));
     }
 }
